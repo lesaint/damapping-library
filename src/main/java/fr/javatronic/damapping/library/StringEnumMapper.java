@@ -64,7 +64,9 @@ import static java.util.Objects.requireNonNull;
  * private static enum CustomBarToString implements StringEnumMapper.EnumToString&lt;EnumA&gt; {
  *   INSTANCE;
  *
- *   public String transform(@Nonnull Bar enumValue) {
+ *  {@literal @}Override
+ *  {@literal @}Nonnull
+ *   public String transform({@literal @}Nonnull Bar enumValue) {
  *     switch (enumValue) {
  *       case ACME:
  *         return "Foo";
@@ -78,6 +80,11 @@ import static java.util.Objects.requireNonNull;
  * assert StringEnumMapper.map(Bar.class).by(CustomBarToString.INSTANCE).toString(Bar.ACME).equals("Foo");
  * </pre>
  * </p>
+ *
+ * TODO use internal Map for case sensitive matching instead of loop to improve performance?
+ * TODO finish support for ignoreCase() and default method on CustomEnumMapper and ByToStringEnumMapper
+ * TODO add shorthand for case-sensitive matching on name with optional such as Guava's <T extends Enum<T>> Optional<T> getIfPresent(Class<T>, String)
+ * TODO Java8 support: make EnumToString a Functional interface, add methods returning optional instead of null? quid of defaults?
  *
  * @author Sébastien Lesaint
  */
