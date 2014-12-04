@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 
 import org.testng.annotations.Test;
 
+import static fr.javatronic.damapping.library.StringEnumMapper.map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -20,12 +21,12 @@ public class StringEnumMapperTest {
    ********/
   @Test
   public void map_byName_toString_returns_null_for_null_value() throws Exception {
-    assertThat(StringEnumMapper.mapByName(EnumA.class).toString(null)).isNull();
+    assertThat(map(EnumA.class).byName().toString(null)).isNull();
   }
 
   @Test
   public void map_byName_toString_returns_name_value() throws Exception {
-    StringEnumMapper.ByNameEnumMapper<EnumA> mapper = StringEnumMapper.mapByName(EnumA.class);
+    StringEnumMapper.ByNameEnumMapper<EnumA> mapper = map(EnumA.class).byName();
 
     for (EnumA enumA : EnumA.values()) {
       assertThat(mapper.toString(enumA)).isEqualTo(enumA.name());
@@ -33,72 +34,67 @@ public class StringEnumMapperTest {
   }
 
   @Test
-  public void map_byName_from_String_returns_null_for_null_value() throws Exception {
-    assertThat(StringEnumMapper.mapByName(EnumA.class).from(null)).isNull();
+  public void map_byName_toEnum_returns_null_for_null_value() throws Exception {
+    assertThat(map(EnumA.class).byName().toEnum(null)).isNull();
   }
 
   @Test
-  public void map_byName_from_String_returns_value_for_exact_name() throws Exception {
-    StringEnumMapper.ByNameEnumMapper<EnumA> mapper = StringEnumMapper.mapByName(EnumA.class);
+  public void map_byName_toEnum_returns_null_for_empty_String() throws Exception {
+    assertThat(map(EnumA.class).byName().toEnum("")).isNull();
+  }
+
+  @Test
+  public void map_byName_toEnum_returns_value_for_exact_name() throws Exception {
+    StringEnumMapper.ByNameEnumMapper<EnumA> mapper = map(EnumA.class).byName();
 
     for (EnumA enumA : EnumA.values()) {
-      assertThat(mapper.from(enumA.name())).isEqualTo(enumA);
+      assertThat(mapper.toEnum(enumA.name())).isEqualTo(enumA);
     }
   }
 
   @Test
-  public void map_byName_from_String_returns_null_for_null() throws Exception {
-    assertThat(StringEnumMapper.mapByName(EnumA.class).from(null)).isNull();
-  }
-
-  @Test
-  public void map_byName_from_String_returns_null_for_empty_String() throws Exception {
-    assertThat(StringEnumMapper.mapByName(EnumA.class).from("")).isNull();
-  }
-
-  @Test
-  public void map_byName_from_String_returns_null_for_case_does_not_match() throws Exception {
-    StringEnumMapper.ByNameEnumMapper<EnumA> mapper = StringEnumMapper.mapByName(EnumA.class);
+  public void map_byName_toEnum_returns_null_for_case_does_not_match() throws Exception {
+    StringEnumMapper.ByNameEnumMapper<EnumA> mapper = map(EnumA.class).byName();
 
     for (EnumA enumA : EnumA.values()) {
-      assertThat(mapper.from(enumA.name().toLowerCase())).isNull();
+      assertThat(mapper.toEnum(enumA.name().toLowerCase())).isNull();
     }
-    assertThat(mapper.from(DUMMY_STRING_VALUE)).isNull();
+    assertThat(mapper.toEnum(DUMMY_STRING_VALUE)).isNull();
   }
 
   /*********************
    * byName ignoreCase *
    *********************/
   @Test
-  public void map_byNam_ignoreCase_toString_returns_null_for_null_value() throws Exception {
-    assertThat(StringEnumMapper.mapByName(EnumA.class).ignoreCase().toString(null)).isNull();
+  public void map_byName_ignoreCase_toString_returns_null_for_null_value() throws Exception {
+    assertThat(map(EnumA.class).byName().ignoreCase().toString(null)).isNull();
   }
 
   @Test
   public void map_byName_ignoreCase_toString_returns_name_value() throws Exception {
-    StringEnumMapper.ByNameEnumMapper<EnumA> mapper = StringEnumMapper.mapByName(EnumA.class).ignoreCase();
+    StringEnumMapper.ByNameEnumMapper<EnumA> mapper = map(EnumA.class).byName().ignoreCase();
 
     for (EnumA enumA : EnumA.values()) {
       assertThat(mapper.toString(enumA)).isEqualTo(enumA.name());
     }
   }
   @Test
-  public void map_byName_ignoreCase_from_String_returns_null_for_null_value() throws Exception {
-    assertThat(StringEnumMapper.mapByName(EnumA.class).ignoreCase().from(null)).isNull();
+  public void map_byName_ignoreCase_toEnum_returns_null_for_null_value() throws Exception {
+    assertThat(map(EnumA.class).byName().ignoreCase().toEnum(null)).isNull();
   }
 
   @Test
-  public void map_byName_ignoreCase_from_String_returns_null_for_case_does_not_match() throws Exception {
-    StringEnumMapper.ByNameEnumMapper<EnumA> mapper = StringEnumMapper.mapByName(EnumA.class).ignoreCase();
+  public void map_byName_ignoreCase_toEnum_returns_name_when_case_does_not_match() throws Exception {
+    StringEnumMapper.ByNameEnumMapper<EnumA> mapper = map(EnumA.class).byName().ignoreCase();
 
     for (EnumA enumA : EnumA.values()) {
-      assertThat(mapper.from(enumA.name().toLowerCase())).isEqualTo(enumA);
+      assertThat(mapper.toEnum(enumA.name().toLowerCase())).isEqualTo(enumA);
     }
   }
 
   @Test
   public void map_byName_ignoreCase_returns_itself_as_ignoreCase_returned_value() throws Exception {
-    StringEnumMapper.ByNameEnumMapper<EnumA> mapper = StringEnumMapper.mapByName(EnumA.class).ignoreCase();
+    StringEnumMapper.ByNameEnumMapper<EnumA> mapper = map(EnumA.class).byName().ignoreCase();
 
     assertThat(mapper.ignoreCase()).isSameAs(mapper);
   }
@@ -108,36 +104,92 @@ public class StringEnumMapperTest {
    ********/
   @Test
   public void map_byToString_toString_returns_null_for_null_value() throws Exception {
-    assertThat(StringEnumMapper.mapByToString(EnumA.class).toString(null)).isNull();
+    assertThat(map(EnumA.class).byToString().toString(null)).isNull();
   }
 
   @Test
-  public void map_byToString_fromString_returns_value_for_exact_String_equality() throws Exception {
-    StringEnumMapper.ByToStringEnumMapper<EnumA> mapper = StringEnumMapper.mapByToString(EnumA.class);
+  public void map_byToString_toString_returns_name_value() throws Exception {
+    StringEnumMapper.ByToStringEnumMapper<EnumA> mapper = map(EnumA.class).byToString();
 
     for (EnumA enumA : EnumA.values()) {
-      assertThat(mapper.from(enumA.toString())).isEqualTo(enumA);
+      assertThat(mapper.toString(enumA)).isEqualTo(enumA.toString());
     }
   }
 
   @Test
-  public void map_byToString_from_String_returns_null_for_null() throws Exception {
-    assertThat(StringEnumMapper.mapByToString(EnumA.class).from(null)).isNull();
+  public void map_byToString_toEnum_returns_null_for_null_value() throws Exception {
+    assertThat(map(EnumA.class).byToString().toEnum(null)).isNull();
   }
 
   @Test
-  public void map_byToString_from_String_returns_null_for_empty_String() throws Exception {
-    assertThat(StringEnumMapper.mapByToString(EnumA.class).from("")).isNull();
+  public void map_byToString_toEnum_returns_null_for_empty_String() throws Exception {
+    assertThat(map(EnumA.class).byToString().toEnum("")).isNull();
   }
 
   @Test
-  public void map_byToString_from_String_returns_null_when_case_does_not_match() throws Exception {
-    StringEnumMapper.ByToStringEnumMapper<EnumA> mapper = StringEnumMapper.mapByToString(EnumA.class);
+  public void map_byToString_toEnum_returns_value_for_exact_String_equality() throws Exception {
+    StringEnumMapper.ByToStringEnumMapper<EnumA> mapper = map(EnumA.class).byToString();
 
     for (EnumA enumA : EnumA.values()) {
-      assertThat(mapper.from(enumA.toString().toUpperCase())).isNull();
+      assertThat(mapper.toEnum(enumA.toString())).isEqualTo(enumA);
     }
-    assertThat(mapper.from(DUMMY_STRING_VALUE)).isNull();
+  }
+
+  @Test
+  public void map_byToString_toEnum_returns_null_when_case_does_not_match() throws Exception {
+    StringEnumMapper.ByToStringEnumMapper<EnumA> mapper = map(EnumA.class).byToString();
+
+    for (EnumA enumA : EnumA.values()) {
+      assertThat(mapper.toEnum(enumA.toString().toUpperCase())).isNull();
+    }
+    assertThat(mapper.toEnum(DUMMY_STRING_VALUE)).isNull();
+  }
+
+  /*************************
+   * byToString ignoreCase *
+   *************************/
+  @Test
+  public void map_byToString_ignoreCase_toString_returns_null_for_null_value() throws Exception {
+    assertThat(map(EnumA.class).byToString().ignoreCase().toString(null)).isNull();
+  }
+
+  @Test
+  public void map_byToString_ignoreCase_toString_returns_toString_value() throws Exception {
+    StringEnumMapper.ByToStringEnumMapper<EnumA> mapper = map(EnumA.class).byToString().ignoreCase();
+
+    for (EnumA enumA : EnumA.values()) {
+      assertThat(mapper.toString(enumA)).isEqualTo(enumA.toString());
+    }
+  }
+
+  @Test
+  public void map_byToString_ignoreCase_toEnum_returns_null_for_null_value() throws Exception {
+    assertThat(map(EnumA.class).byToString().ignoreCase().toEnum(null)).isNull();
+  }
+
+  @Test
+  public void map_byToString_ignoreCase_toEnum_returns_value_when_case_matches() throws Exception {
+    StringEnumMapper.ByToStringEnumMapper<EnumA> mapper = map(EnumA.class).byToString().ignoreCase();
+
+    for (EnumA enumA : EnumA.values()) {
+      assertThat(mapper.toEnum(enumA.name())).isEqualTo(enumA);
+    }
+  }
+
+  @Test
+  public void map_byToString_ignoreCase_toEnum_returns_value_when_case_does_not_match() throws Exception {
+    StringEnumMapper.ByToStringEnumMapper<EnumA> mapper = map(EnumA.class).byToString().ignoreCase();
+
+    for (EnumA enumA : EnumA.values()) {
+      assertThat(mapper.toEnum(enumA.name().toLowerCase())).isEqualTo(enumA);
+    }
+  }
+
+  @Test
+  public void map_byToString_ignoreCase_returns_itself_as_ignoreCase_returned_value() throws Exception {
+    StringEnumMapper.ByToStringEnumMapper<EnumA> mapper = map(EnumA.class).byToString().ignoreCase();
+
+    assertThat(mapper.ignoreCase()).isSameAs(mapper);
   }
 
 
@@ -146,14 +198,12 @@ public class StringEnumMapperTest {
    ********/
   @Test
   public void map_byCustom_toString_returns_null_for_null_value() throws Exception {
-    assertThat(StringEnumMapper.map(EnumA.class).by(CustomEnumAToString.INSTANCE).toString(null)).isNull();
+    assertThat(map(EnumA.class).by(CustomEnumAToString.INSTANCE).toString(null)).isNull();
   }
 
   @Test
   public void map_byCustom_toString_returns_name_value() throws Exception {
-    StringEnumMapper.CustomStringEnumMapper<EnumA> mapper = StringEnumMapper.map(EnumA.class).by(
-        CustomEnumAToString.INSTANCE
-    );
+    StringEnumMapper.CustomStringEnumMapper<EnumA> mapper = map(EnumA.class).by(CustomEnumAToString.INSTANCE);
 
     for (EnumA enumA : EnumA.values()) {
       assertThat(mapper.toString(enumA)).isEqualTo(CustomEnumAToString.INSTANCE.transform(enumA));
@@ -161,41 +211,37 @@ public class StringEnumMapperTest {
   }
 
   @Test
-  public void map_byCustom_from_String_returns_null_for_null_value() throws Exception {
-    assertThat(StringEnumMapper.map(EnumA.class).by(CustomEnumAToString.INSTANCE).from(null)).isNull();
+  public void map_byCustom_toEnum_returns_null_for_null_value() throws Exception {
+    assertThat(map(EnumA.class).by(CustomEnumAToString.INSTANCE).toEnum(null)).isNull();
   }
 
   @Test
-  public void map_byCustom_from_String_returns_value_for_exact_name() throws Exception {
-    StringEnumMapper.CustomStringEnumMapper<EnumA> mapper = StringEnumMapper.map(EnumA.class).by(
-        CustomEnumAToString.INSTANCE
-    );
+  public void map_byCustom_toEnum_returns_value_for_exact_name() throws Exception {
+    StringEnumMapper.CustomStringEnumMapper<EnumA> mapper = map(EnumA.class).by(CustomEnumAToString.INSTANCE);
 
     for (EnumA enumA : EnumA.values()) {
-      assertThat(mapper.from(CustomEnumAToString.INSTANCE.transform(enumA))).isEqualTo(enumA);
+      assertThat(mapper.toEnum(CustomEnumAToString.INSTANCE.transform(enumA))).isEqualTo(enumA);
     }
   }
 
   @Test
-  public void map_byCustom_from_String_returns_null_for_null() throws Exception {
-    assertThat(StringEnumMapper.map(EnumA.class).by(CustomEnumAToString.INSTANCE).from(null)).isNull();
+  public void map_byCustom_toEnum_returns_null_for_null() throws Exception {
+    assertThat(map(EnumA.class).by(CustomEnumAToString.INSTANCE).toEnum(null)).isNull();
   }
 
   @Test
-  public void map_byCustom_from_String_returns_null_for_empty_String() throws Exception {
-    assertThat(StringEnumMapper.map(EnumA.class).by(CustomEnumAToString.INSTANCE).from("")).isNull();
+  public void map_byCustom_toEnum_returns_null_for_empty_String() throws Exception {
+    assertThat(map(EnumA.class).by(CustomEnumAToString.INSTANCE).toEnum("")).isNull();
   }
 
   @Test
-  public void map_byCustom_from_String_returns_null_for_case_does_not_match() throws Exception {
-    StringEnumMapper.CustomStringEnumMapper<EnumA> mapper = StringEnumMapper.map(EnumA.class).by(
-        CustomEnumAToString.INSTANCE
-    );
+  public void map_byCustom_toEnum_returns_null_for_case_does_not_match() throws Exception {
+    StringEnumMapper.CustomStringEnumMapper<EnumA> mapper = map(EnumA.class).by(CustomEnumAToString.INSTANCE);
 
     for (EnumA enumA : EnumA.values()) {
-      assertThat(mapper.from(CustomEnumAToString.INSTANCE.transform(enumA).toUpperCase())).isNull();
+      assertThat(mapper.toEnum(CustomEnumAToString.INSTANCE.transform(enumA).toUpperCase())).isNull();
     }
-    assertThat(mapper.from(DUMMY_STRING_VALUE)).isNull();
+    assertThat(mapper.toEnum(DUMMY_STRING_VALUE)).isNull();
   }
 
   private static enum EnumA {
@@ -220,8 +266,9 @@ public class StringEnumMapperTest {
           return "Bar";
         case VALUE_3:
           return "Acme";
+        default:
+          throw new IllegalArgumentException("value is not supported in toString(), fix toString(): " + enumValue);
       }
-      throw new NullPointerException("provided enum Value is not supposed to be null");
     }
   }
 }

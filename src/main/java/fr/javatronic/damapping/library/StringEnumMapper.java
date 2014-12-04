@@ -32,21 +32,38 @@ public class StringEnumMapper {
     // prevents instantiation
   }
 
-  public static interface EnumToString<T extends Enum<T>> {
-    @Nonnull
-    String transform(@Nonnull T enumValue);
-  }
-
   public static <T extends Enum<T>> EnumMapperFactory<T> map(@Nonnull final Class<T> enumAClass) {
     return new EnumMapperFactory<T>() {
       @Override
       public CustomStringEnumMapper<T> by(@Nonnull EnumToString<T> transformer) {
         return new CustomStringEnumMapperImpl<T>(enumAClass, transformer);
       }
+
+      @Override
+      public ByNameEnumMapper<T> byName() {
+        return new ByNameEnumMapperImpl<T>(requireNonNull(enumAClass));
+      }
+
+      @Nonnull
+      @Override
+      public ByToStringEnumMapper<T> byToString() {
+        return new ByToStringEnumMapperImpl<T>(requireNonNull(enumAClass));
+      }
     };
   }
 
+  public static interface EnumToString<T extends Enum<T>> {
+    @Nonnull
+    String transform(@Nonnull T enumValue);
+  }
+
   public static interface EnumMapperFactory<T extends Enum<T>> {
+    @Nonnull
+    ByNameEnumMapper<T> byName();
+
+    @Nonnull
+    ByToStringEnumMapper<T> byToString();
+
     @Nonnull
     CustomStringEnumMapper<T> by(@Nonnull EnumToString<T> transformer);
   }
@@ -56,10 +73,31 @@ public class StringEnumMapper {
     String toString(@Nullable E enumValue);
 
     @Nullable
-    E from(@Nullable String str);
+    E toEnum(@Nullable String str);
   }
 
-  public static class CustomStringEnumMapperImpl<E extends Enum<E>> implements CustomStringEnumMapper<E> {
+  public static interface ByToStringEnumMapper<T extends Enum<T>> {
+    @Nullable
+    String toString(@Nullable T enumValue);
+
+    @Nullable
+    T toEnum(@Nullable String str);
+
+    @Nonnull
+    ByToStringEnumMapper<T> ignoreCase();
+  }
+
+  public static interface ByNameEnumMapper<T extends Enum<T>> {
+    @Nullable
+    String toString(@Nullable T enumValue);
+
+    @Nullable
+    T toEnum(@Nullable String str);
+
+    ByNameEnumMapper<T> ignoreCase();
+  }
+
+  private static class CustomStringEnumMapperImpl<E extends Enum<E>> implements CustomStringEnumMapper<E> {
     @Nonnull
     private final Class<E> clazz;
     @Nonnull
@@ -82,7 +120,7 @@ public class StringEnumMapper {
 
     @Nullable
     @Override
-    public E from(@Nullable String str) {
+    public E toEnum(@Nullable String str) {
       if (str == null || str.isEmpty()) {
         return null;
       }
@@ -94,69 +132,6 @@ public class StringEnumMapper {
       }
       return null;
     }
-  }
-
-  @Nonnull
-  public static <T extends Enum<T>> ByToStringEnumMapper<T> mapByToString(@Nonnull Class<T> enumAClass) {
-    return new ByToStringEnumMapperImpl<T>(requireNonNull(enumAClass));
-  }
-
-  public static interface ByToStringEnumMapper<T extends Enum<T>> {
-    @Nullable
-    String toString(@Nullable T enumValue);
-
-    @Nullable
-    T from(@Nullable String str);
-  }
-
-  private static class ByToStringEnumMapperImpl<E extends Enum<E>> implements ByToStringEnumMapper<E> {
-    private final Class<E> clazz;
-
-    public ByToStringEnumMapperImpl(Class<E> clazz) {
-      this.clazz = clazz;
-    }
-
-    @Nullable
-    @Override
-    public String toString(@Nullable E enumValue) {
-      if (enumValue == null) {
-        return null;
-      }
-
-      return enumValue.toString();
-    }
-
-    @Nullable
-    @Override
-    public E from(@Nullable String str) {
-      if (str == null || str.isEmpty()) {
-        return null;
-      }
-
-      for (E e : clazz.getEnumConstants()) {
-        if (e.toString().equals(str)) {
-          return e;
-        }
-      }
-      return null;
-    }
-
-  }
-
-  @Nonnull
-  public static <T extends Enum<T>> ByNameEnumMapper<T> mapByName(@Nonnull Class<T> enumAClass) {
-    return new ByNameEnumMapperImpl<T>(requireNonNull(enumAClass));
-  }
-
-
-  public static interface ByNameEnumMapper<T extends Enum<T>> {
-    @Nullable
-    String toString(@Nullable T enumValue);
-
-    @Nullable
-    T from(@Nullable String str);
-
-    ByNameEnumMapper<T> ignoreCase();
   }
 
   private static abstract class BaseByNameEnumMapperImpl<E extends Enum<E>> implements StringEnumMapper.ByNameEnumMapper<E> {
@@ -185,7 +160,7 @@ public class StringEnumMapper {
 
     @Nullable
     @Override
-    public E from(@Nullable String str) {
+    public E toEnum(@Nullable String str) {
       if (str == null || str.isEmpty()) {
         return null;
       }
@@ -212,7 +187,7 @@ public class StringEnumMapper {
 
     @Nullable
     @Override
-    public E from(@Nullable String str) {
+    public E toEnum(@Nullable String str) {
       if (str == null || str.isEmpty()) {
         return null;
       }
@@ -227,6 +202,82 @@ public class StringEnumMapper {
 
     @Override
     public ByNameEnumMapper<E> ignoreCase() {
+      return this;
+    }
+  }
+
+  private static abstract class BaseByToStringEnumMapperImpl<E extends Enum<E>> implements ByToStringEnumMapper<E> {
+    protected final Class<E> clazz;
+
+    protected BaseByToStringEnumMapperImpl(Class<E> clazz) {
+      this.clazz = clazz;
+    }
+
+    @Nullable
+    @Override
+    public String toString(@Nullable E enumValue) {
+      if (enumValue == null) {
+        return null;
+      }
+
+      return enumValue.toString();
+    }
+
+  }
+
+  private static class ByToStringEnumMapperImpl<E extends Enum<E>> extends BaseByToStringEnumMapperImpl<E> {
+
+    public ByToStringEnumMapperImpl(Class<E> clazz) {
+      super(clazz);
+    }
+
+    @Nullable
+    @Override
+    public E toEnum(@Nullable String str) {
+      if (str == null || str.isEmpty()) {
+        return null;
+      }
+
+      for (E e : clazz.getEnumConstants()) {
+        if (e.toString().equals(str)) {
+          return e;
+        }
+      }
+      return null;
+    }
+
+    @Nonnull
+    @Override
+    public ByToStringEnumMapper<E> ignoreCase() {
+      return new IgnoreCaseByToStringEnumMapperImpl<E>(clazz);
+    }
+
+  }
+
+  private static class IgnoreCaseByToStringEnumMapperImpl<E extends Enum<E>> extends BaseByToStringEnumMapperImpl<E> {
+
+    public IgnoreCaseByToStringEnumMapperImpl(Class<E> clazz) {
+      super(clazz);
+    }
+
+    @Nullable
+    @Override
+    public E toEnum(@Nullable String str) {
+      if (str == null || str.isEmpty()) {
+        return null;
+      }
+
+      for (E e : clazz.getEnumConstants()) {
+        if (e.toString().compareToIgnoreCase(str) == 0) {
+          return e;
+        }
+      }
+      return null;
+    }
+
+    @Nonnull
+    @Override
+    public ByToStringEnumMapper<E> ignoreCase() {
       return this;
     }
   }
