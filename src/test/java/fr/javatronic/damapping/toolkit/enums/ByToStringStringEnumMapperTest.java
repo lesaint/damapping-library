@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package fr.javatronic.damapping.library;
+package fr.javatronic.damapping.toolkit.enums;
 
 import org.testng.annotations.Test;
 
-import static fr.javatronic.damapping.library.StringEnumMapper.map;
+import static fr.javatronic.damapping.toolkit.enums.StringEnumMapper.map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * ByCustomStringEnumMapperTest - Unit tests for class {@link fr.javatronic.damapping.library.StringEnumMapper}.
+ * ByCustomStringEnumMapperTest - Unit tests for class {@link fr.javatronic.damapping.toolkit.enums.StringEnumMapper}.
  *
  * @author Sébastien Lesaint
  */
@@ -30,9 +30,11 @@ public class ByToStringStringEnumMapperTest {
   private static final String DUMMY_STRING_VALUE = "fooBarAcme";
 
 
-  /********
+  /**
+   * *****
    * byToString
-   ********/
+   * ******
+   */
   @Test
   public void map_byToString_toString_returns_null_for_null_value() throws Exception {
     assertThat(map(EnumA.class).byToString().toString(null)).isNull();
@@ -76,9 +78,11 @@ public class ByToStringStringEnumMapperTest {
     assertThat(mapper.toEnum(DUMMY_STRING_VALUE)).isNull();
   }
 
-  /*************************
+  /**
+   * **********************
    * byToString ignoreCase *
-   *************************/
+   * ***********************
+   */
   @Test
   public void map_byToString_ignoreCase_toString_returns_null_for_null_value() throws Exception {
     assertThat(map(EnumA.class).byToString().ignoreCase().toString(null)).isNull();

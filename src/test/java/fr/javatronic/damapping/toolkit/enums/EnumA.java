@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package fr.javatronic.damapping.library;
+package fr.javatronic.damapping.toolkit.enums;
 
 /**
-* EnumA -
-*
-* @author Sébastien Lesaint
-*/
+ * EnumA -
+ *
+ * @author Sébastien Lesaint
+ */
 enum EnumA {
   VALUE_1, VALUE_2, VALUE_3;
 

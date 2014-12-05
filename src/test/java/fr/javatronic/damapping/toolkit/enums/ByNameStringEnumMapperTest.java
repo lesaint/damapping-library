@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package fr.javatronic.damapping.library;
+package fr.javatronic.damapping.toolkit.enums;
 
 import org.testng.annotations.Test;
 
-import static fr.javatronic.damapping.library.StringEnumMapper.map;
+import static fr.javatronic.damapping.toolkit.enums.StringEnumMapper.map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * ByCustomStringEnumMapperTest - Unit tests for class {@link fr.javatronic.damapping.library.StringEnumMapper}.
+ * ByCustomStringEnumMapperTest - Unit tests for class {@link fr.javatronic.damapping.toolkit.enums.StringEnumMapper}.
  *
  * @author Sébastien Lesaint
  */
@@ -30,9 +30,11 @@ public class ByNameStringEnumMapperTest {
   private static final String DUMMY_STRING_VALUE = "fooBarAcme";
   private static final String DEFAULT_STRING = "DEFAULT_STRING";
 
-  /********
+  /**
+   * *****
    * byName
-   ********/
+   * ******
+   */
   @Test
   public void map_byName_toString_returns_null_for_null_value() throws Exception {
     assertThat(map(EnumA.class).byName().toString(null)).isNull();
@@ -72,9 +74,11 @@ public class ByNameStringEnumMapperTest {
     assertThat(mapper.toEnum(DUMMY_STRING_VALUE)).isNull();
   }
 
-  /*********************
+  /**
+   * ******************
    * byName ignoreCase *
-   *********************/
+   * *******************
+   */
   @Test
   public void map_byName_ignoreCase_toString_returns_null_for_null_value() throws Exception {
     assertThat(map(EnumA.class).byName().ignoreCase().toString(null)).isNull();
@@ -106,9 +110,11 @@ public class ByNameStringEnumMapperTest {
     assertThat(mapper.ignoreCase()).isSameAs(mapper);
   }
 
-  /***********************
+  /**
+   * ********************
    * byName with default *
-   ***********************/
+   * *********************
+   */
   @Test
   public void map_byName_withDefault_String_toString_returns_default_string_for_null_value() throws Exception {
     assertThat(map(EnumA.class).byName().withDefault(DEFAULT_STRING).toString(null)).isEqualTo(DEFAULT_STRING);
@@ -119,9 +125,11 @@ public class ByNameStringEnumMapperTest {
     mapper_toString_returns_name_value(map(EnumA.class).byName().withDefault(DEFAULT_STRING));
   }
 
-  /************
+  /**
+   * *********
    * utilities
-   ***********/
+   * *********
+   */
   private void mapper_toString_returns_name_value(StringEnumMapper.ByNameEnumMapper<EnumA> mapper) {
     for (EnumA enumA : EnumA.values()) {
       assertThat(mapper.toString(enumA)).isEqualTo(enumA.name());

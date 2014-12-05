@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package fr.javatronic.damapping.library;
+package fr.javatronic.damapping.toolkit.enums;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

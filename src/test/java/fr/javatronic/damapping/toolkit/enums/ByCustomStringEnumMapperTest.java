@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package fr.javatronic.damapping.library;
+package fr.javatronic.damapping.toolkit.enums;
 
 import javax.annotation.Nonnull;
 
 import org.testng.annotations.Test;
 
-import static fr.javatronic.damapping.library.StringEnumMapper.map;
+import static fr.javatronic.damapping.toolkit.enums.StringEnumMapper.map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * ByCustomStringEnumMapperTest - Unit tests for class {@link StringEnumMapper}.
+ * ByCustomStringEnumMapperTest - Unit tests for class {@link fr.javatronic.damapping.toolkit.enums.StringEnumMapper}.
  *
  * @author Sébastien Lesaint
  */
@@ -31,9 +31,11 @@ public class ByCustomStringEnumMapperTest {
 
   private static final String DUMMY_STRING_VALUE = "fooBarAcme";
 
-  /********
+  /**
+   * *****
    * custom
-   ********/
+   * ******
+   */
   @Test
   public void toString_returns_null_for_null_value() throws Exception {
     assertThat(map(EnumA.class).by(CustomEnumAToString.INSTANCE).toString(null)).isNull();
@@ -82,9 +84,11 @@ public class ByCustomStringEnumMapperTest {
     assertThat(mapper.toEnum(DUMMY_STRING_VALUE)).isNull();
   }
 
-  /************
+  /**
+   * *********
    * utilities
-   ***********/
+   * *********
+   */
 
   private static enum CustomEnumAToString implements StringEnumMapper.EnumToString<EnumA> {
     INSTANCE;
