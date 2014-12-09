@@ -80,6 +80,10 @@ import static java.util.Objects.requireNonNull;
  * assert StringEnumMapper.map(Bar.class).by(CustomBarToString.INSTANCE).toString(Bar.ACME).equals("Foo");
  * </pre>
  * </p>
+ * <p>
+ * <strong>Note on thread-safety:</strong> mapper produced by this class are thread-safe and can safely be shared,
+ * stored in class property and/or be static.
+ * </p>
  *
  * TODO use internal Map for case sensitive matching instead of loop to improve performance?
  * TODO finish support for ignoreCase() and default method on CustomEnumMapper and ByToStringEnumMapper
