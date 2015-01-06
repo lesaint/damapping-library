@@ -16,9 +16,10 @@
 package fr.javatronic.damapping.toolkit.enums;
 
 /**
- * EnumEnumMapper - This class provides the developer with a convenient way to map an Enum to and from another one.
+ * A mapper that uses custom method represented by a {@linkn EnumToString} implementation to match an enum to a
+ * String (and the other way around).
  *
- * @author Sébastien Lesaint
+ * @param <E> an enum type
  */
-public class EnumEnumMapper {
+public interface CustomStringEnumMapper<E extends Enum<E>> extends StringEnumMapper<E> {
 }

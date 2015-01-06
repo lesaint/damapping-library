@@ -15,10 +15,14 @@
  */
 package fr.javatronic.damapping.toolkit.enums;
 
+import javax.annotation.Nonnull;
+
 /**
- * EnumEnumMapper - This class provides the developer with a convenient way to map an Enum to and from another one.
+ * A mapper that uses the {@link Enum#toString()} method to match an enum to a String (and the other way around).
  *
- * @author Sébastien Lesaint
+ * @param <T> an enum type
  */
-public class EnumEnumMapper {
+public interface ByToStringEnumMapper<T extends Enum<T>> extends StringEnumMapper<T> {
+  @Nonnull
+  ByToStringEnumMapper<T> ignoreCase();
 }

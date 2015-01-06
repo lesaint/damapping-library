@@ -19,11 +19,12 @@ import javax.annotation.Nonnull;
 
 import org.testng.annotations.Test;
 
-import static fr.javatronic.damapping.toolkit.enums.StringEnumMapper.map;
+import static fr.javatronic.damapping.toolkit.enums.StringEnumMappers.map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * ByCustomStringEnumMapperTest - Unit tests for class {@link fr.javatronic.damapping.toolkit.enums.StringEnumMapper}.
+ * ByCustomStringEnumMapperTest - Unit tests for class mapping an enum to and from a String by the some custom
+ * &transformation.
  *
  * @author Sébastien Lesaint
  */
@@ -31,11 +32,9 @@ public class ByCustomStringEnumMapperTest {
 
   private static final String DUMMY_STRING_VALUE = "fooBarAcme";
 
-  /**
-   * *****
-   * custom
-   * ******
-   */
+  /*========*
+   * custom *
+   *========*/
   @Test
   public void toString_returns_null_for_null_value() throws Exception {
     assertThat(map(EnumA.class).by(CustomEnumAToString.INSTANCE).toString(null)).isNull();
@@ -43,7 +42,7 @@ public class ByCustomStringEnumMapperTest {
 
   @Test
   public void toString_returns_transform_value() throws Exception {
-    StringEnumMapper.CustomStringEnumMapper<EnumA> mapper = map(EnumA.class).by(CustomEnumAToString.INSTANCE);
+    CustomStringEnumMapper<EnumA> mapper = map(EnumA.class).by(CustomEnumAToString.INSTANCE);
 
     for (EnumA enumA : EnumA.values()) {
       assertThat(mapper.toString(enumA)).isEqualTo(CustomEnumAToString.INSTANCE.transform(enumA));
@@ -57,7 +56,7 @@ public class ByCustomStringEnumMapperTest {
 
   @Test
   public void toEnum_returns_enum_value_for_exact_string_value() throws Exception {
-    StringEnumMapper.CustomStringEnumMapper<EnumA> mapper = map(EnumA.class).by(CustomEnumAToString.INSTANCE);
+    CustomStringEnumMapper<EnumA> mapper = map(EnumA.class).by(CustomEnumAToString.INSTANCE);
 
     for (EnumA enumA : EnumA.values()) {
       assertThat(mapper.toEnum(CustomEnumAToString.INSTANCE.transform(enumA))).isEqualTo(enumA);
@@ -76,7 +75,7 @@ public class ByCustomStringEnumMapperTest {
 
   @Test
   public void toEnum_returns_null_for_case_does_not_match() throws Exception {
-    StringEnumMapper.CustomStringEnumMapper<EnumA> mapper = map(EnumA.class).by(CustomEnumAToString.INSTANCE);
+    CustomStringEnumMapper<EnumA> mapper = map(EnumA.class).by(CustomEnumAToString.INSTANCE);
 
     for (EnumA enumA : EnumA.values()) {
       assertThat(mapper.toEnum(CustomEnumAToString.INSTANCE.transform(enumA).toUpperCase())).isNull();
@@ -84,13 +83,10 @@ public class ByCustomStringEnumMapperTest {
     assertThat(mapper.toEnum(DUMMY_STRING_VALUE)).isNull();
   }
 
-  /**
-   * *********
-   * utilities
-   * *********
-   */
-
-  private static enum CustomEnumAToString implements StringEnumMapper.EnumToString<EnumA> {
+  /*===========*
+   * utilities *
+   *===========*/
+  private static enum CustomEnumAToString implements EnumToString<EnumA> {
     INSTANCE;
 
     @Nonnull

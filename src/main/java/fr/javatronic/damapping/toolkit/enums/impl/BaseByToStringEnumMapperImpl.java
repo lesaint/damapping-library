@@ -13,12 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package fr.javatronic.damapping.toolkit.enums;
+package fr.javatronic.damapping.toolkit.enums.impl;
+
+import fr.javatronic.damapping.toolkit.enums.ByToStringEnumMapper;
+
+import javax.annotation.Nullable;
 
 /**
- * EnumEnumMapper - This class provides the developer with a convenient way to map an Enum to and from another one.
- *
- * @author Sébastien Lesaint
- */
-public class EnumEnumMapper {
+* BaseByToStringEnumMapperImpl -
+*
+* @author Sébastien Lesaint
+*/
+abstract class BaseByToStringEnumMapperImpl<E extends Enum<E>> implements ByToStringEnumMapper<E> {
+  protected final Class<E> clazz;
+
+  protected BaseByToStringEnumMapperImpl(Class<E> clazz) {
+    this.clazz = clazz;
+  }
+
+  @Override
+  @Nullable
+  public String toString(@Nullable E enumValue) {
+    if (enumValue == null) {
+      return null;
+    }
+
+    return enumValue.toString();
+  }
+
 }
