@@ -18,13 +18,13 @@ package fr.javatronic.damapping.toolkit.enums;
 import javax.annotation.Nonnull;
 
 /**
- * Defines a rule to be used by a {@link CustomStringEnumMapper} to transform an enum value into a String.
+ * Defines a rule to be used by a {@link StringEnumMapper} to transform an enum value into a String.
  * <p>
  * This rule can not have any exception, ie. any enum value must be transformed into a non null String.
  * </p>
  * <p>
  * If the transformation returns the same String for more than one enum value, the behavior of the
- * {@link CustomStringEnumMapper} that uses it is undefined.
+ * {@link StringEnumMapper} that uses it is undefined.
  * </p>
  *
  * @param <T> an enum type

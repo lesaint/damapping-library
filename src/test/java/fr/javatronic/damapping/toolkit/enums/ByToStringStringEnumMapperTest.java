@@ -40,7 +40,7 @@ public class ByToStringStringEnumMapperTest {
 
   @Test
   public void map_byToString_toString_returns_name_value() throws Exception {
-    ByToStringEnumMapper<EnumA> mapper = map(EnumA.class).byToString();
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).byToString();
 
     for (EnumA enumA : EnumA.values()) {
       assertThat(mapper.toString(enumA)).isEqualTo(enumA.toString());
@@ -59,7 +59,7 @@ public class ByToStringStringEnumMapperTest {
 
   @Test
   public void map_byToString_toEnum_returns_value_for_exact_String_equality() throws Exception {
-    ByToStringEnumMapper<EnumA> mapper = map(EnumA.class).byToString();
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).byToString();
 
     for (EnumA enumA : EnumA.values()) {
       assertThat(mapper.toEnum(enumA.toString())).isEqualTo(enumA);
@@ -68,7 +68,7 @@ public class ByToStringStringEnumMapperTest {
 
   @Test
   public void map_byToString_toEnum_returns_null_when_case_does_not_match() throws Exception {
-    ByToStringEnumMapper<EnumA> mapper = map(EnumA.class).byToString();
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).byToString();
 
     for (EnumA enumA : EnumA.values()) {
       assertThat(mapper.toEnum(enumA.toString().toUpperCase())).isNull();
@@ -86,7 +86,7 @@ public class ByToStringStringEnumMapperTest {
 
   @Test
   public void map_byToString_ignoreCase_toString_returns_toString_value() throws Exception {
-    ByToStringEnumMapper<EnumA> mapper = map(EnumA.class).byToString().ignoreCase();
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).byToString().ignoreCase();
 
     for (EnumA enumA : EnumA.values()) {
       assertThat(mapper.toString(enumA)).isEqualTo(enumA.toString());
@@ -100,25 +100,25 @@ public class ByToStringStringEnumMapperTest {
 
   @Test
   public void map_byToString_ignoreCase_toEnum_returns_value_when_case_matches() throws Exception {
-    ByToStringEnumMapper<EnumA> mapper = map(EnumA.class).byToString().ignoreCase();
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).byToString().ignoreCase();
 
     for (EnumA enumA : EnumA.values()) {
-      assertThat(mapper.toEnum(enumA.name())).isEqualTo(enumA);
+      assertThat(mapper.toEnum(enumA.toString())).isEqualTo(enumA);
     }
   }
 
   @Test
   public void map_byToString_ignoreCase_toEnum_returns_value_when_case_does_not_match() throws Exception {
-    ByToStringEnumMapper<EnumA> mapper = map(EnumA.class).byToString().ignoreCase();
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).byToString().ignoreCase();
 
     for (EnumA enumA : EnumA.values()) {
-      assertThat(mapper.toEnum(enumA.name().toLowerCase())).isEqualTo(enumA);
+      assertThat(mapper.toEnum(enumA.toString().toLowerCase())).isEqualTo(enumA);
     }
   }
 
   @Test
   public void map_byToString_ignoreCase_returns_itself_as_ignoreCase_returned_value() throws Exception {
-    ByToStringEnumMapper<EnumA> mapper = map(EnumA.class).byToString().ignoreCase();
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).byToString().ignoreCase();
 
     assertThat(mapper.ignoreCase()).isSameAs(mapper);
   }

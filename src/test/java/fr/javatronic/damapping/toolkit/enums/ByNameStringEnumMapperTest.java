@@ -21,7 +21,7 @@ import static fr.javatronic.damapping.toolkit.enums.StringEnumMappers.map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * ByCustomStringEnumMapperTest - Unit tests for class mapping an enum to and from a String by the enum name method.
+ * ByNameStringEnumMapperTest - Unit tests for class mapping an enum to and from a String by the enum name method.
  *
  * @author Sébastien Lesaint
  */
@@ -55,7 +55,7 @@ public class ByNameStringEnumMapperTest {
 
   @Test
   public void map_byName_toEnum_returns_value_for_exact_name() throws Exception {
-    ByNameEnumMapper<EnumA> mapper = map(EnumA.class).byName();
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).byName();
 
     for (EnumA enumA : EnumA.values()) {
       assertThat(mapper.toEnum(enumA.name())).isEqualTo(enumA);
@@ -64,7 +64,7 @@ public class ByNameStringEnumMapperTest {
 
   @Test
   public void map_byName_toEnum_returns_null_for_case_does_not_match() throws Exception {
-    ByNameEnumMapper<EnumA> mapper = map(EnumA.class).byName();
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).byName();
 
     for (EnumA enumA : EnumA.values()) {
       assertThat(mapper.toEnum(enumA.name().toLowerCase())).isNull();
@@ -92,7 +92,7 @@ public class ByNameStringEnumMapperTest {
 
   @Test
   public void map_byName_ignoreCase_toEnum_returns_name_when_case_does_not_match() throws Exception {
-    ByNameEnumMapper<EnumA> mapper = map(EnumA.class).byName().ignoreCase();
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).byName().ignoreCase();
 
     for (EnumA enumA : EnumA.values()) {
       assertThat(mapper.toEnum(enumA.name().toLowerCase())).isEqualTo(enumA);
@@ -101,7 +101,7 @@ public class ByNameStringEnumMapperTest {
 
   @Test
   public void map_byName_ignoreCase_returns_itself_as_ignoreCase_returned_value() throws Exception {
-    ByNameEnumMapper<EnumA> mapper = map(EnumA.class).byName().ignoreCase();
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).byName().ignoreCase();
 
     assertThat(mapper.ignoreCase()).isSameAs(mapper);
   }
@@ -122,7 +122,7 @@ public class ByNameStringEnumMapperTest {
   /*==========*
   * utilities *
    *==========*/
-  private void mapper_toString_returns_name_value(ByNameEnumMapper<EnumA> mapper) {
+  private void mapper_toString_returns_name_value(StringEnumMapper<EnumA> mapper) {
     for (EnumA enumA : EnumA.values()) {
       assertThat(mapper.toString(enumA)).isEqualTo(enumA.name());
     }

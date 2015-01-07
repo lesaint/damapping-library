@@ -15,6 +15,9 @@
  */
 package fr.javatronic.damapping.toolkit.enums;
 
+import fr.javatronic.damapping.toolkit.MappingDefaults;
+
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -42,4 +45,111 @@ public interface StringEnumMapper<E extends Enum<E>> {
    */
   @Nullable
   E toEnum(@Nullable String str);
+
+  /**
+   * Returns a mapper that will map an enum to and from a String the same way as the current mapper but will use a
+   * String comparison that ignores case.
+   *
+   * @return a StringEnumMapper
+   */
+  @Nonnull
+  StringEnumMapper<E> ignoreCase();
+
+  /**
+   * Returns a mapper that will map an enum to and from a String the same way as the current mapper but will in
+   * addition (or in place) use the specified defaults when mapping from a String.
+   *
+   * @param defaults a {@link fr.javatronic.damapping.toolkit.MappingDefaults}
+   *
+   * @return a {@link fr.javatronic.damapping.toolkit.enums.StringEnumMapper}
+   */
+  @Nonnull
+  StringEnumMapper<E> withStringDefaults(@Nonnull MappingDefaults<String> defaults);
+
+  /**
+   * Returns a mapper that will map an enum to and from a String the same way as the current mapper but will in
+   * addition (or in place) use the specified defaults when mapping from a enum.
+   *
+   * @param defaults a {@link fr.javatronic.damapping.toolkit.MappingDefaults}
+   *
+   * @return a {@link fr.javatronic.damapping.toolkit.enums.StringEnumMapper}
+   */
+  @Nonnull
+  StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults);
+
+  /**
+   * Returns a mapper that will map an enum to and from a String the same way as the current mapper but will in
+   * addition return the specified String value when mapping from a {@code null} enum value.
+   *
+   * @param defaultValue the default String
+   *
+   * @return a StringEnumMapper
+   *
+   * @throws NullPointerException if the specified value is null
+   * @see StringEnumMapper#toString(Enum)
+   */
+  @Nonnull
+  StringEnumMapper<E> withDefault(@Nonnull String defaultValue);
+
+  /**
+   * Returns a mapper that will map an enum to and from a String the same way as the current mapper but will in
+   * addition return the specified enum value when mapping from a {@code null}, empty String or one that doesn't match
+   * any enum value.
+   * <p>
+   * This is a shorthand equivalent to calling all three methods {@link #withNullDefault(Enum)},
+   * {@link #withEmptyDefault(Enum)} and {@link #withUnknownDefault(Enum)} with the same enum value.
+   * </p>
+   *
+   * @param defaultValueForAll the default enum value
+   *
+   * @return a StringEnumMapper instance
+   *
+   * @throws NullPointerException if the specified value is null
+   * @see StringEnumMapper#toString(Enum)
+   */
+  @Nonnull
+  StringEnumMapper<E> withDefault(@Nonnull E defaultValueForAll);
+
+  /**
+   * Creates a new mapper that will map an enum to and from a String the same way as the current mapper but will in
+   * addition return the specified enum value when mapping from a {@code null} String.
+   *
+   * @param nullDefaultValue the default enum value
+   *
+   * @return a StringEnumMapper instance
+   *
+   * @throws NullPointerException if the specified value is {@code null}
+   * @see StringEnumMapper#toString(Enum)
+   */
+  @Nonnull
+  StringEnumMapper<E> withNullDefault(@Nonnull E nullDefaultValue);
+
+  /**
+   * Creates a new mapper that will map an enum to and from a String the same way as the current mapper but will in
+   * addition return the specified enum value when mapping from an empty String.
+   *
+   * @param emptyDefaultValue the default enum value
+   *
+   * @return a StringEnumMapper instance
+   *
+   * @throws NullPointerException if the specified value is {@code null}
+   * @see StringEnumMapper#toString(Enum)
+   */
+  @Nonnull
+  StringEnumMapper<E> withEmptyDefault(@Nonnull E emptyDefaultValue);
+
+  /**
+   * Creates a new mapper that will map an enum to and from a String the same way as the current mapper but will in
+   * addition return the specified enum value when mapping from a String that doesn't match any value of the enum and
+   * is neither {@code null} nor empty.
+   *
+   * @param unknownDefaultValue the default enum value
+   *
+   * @return a StringEnumMapper instance
+   *
+   * @throws NullPointerException if the specified value is {@code null}
+   * @see StringEnumMapper#toString(Enum)
+   */
+  @Nonnull
+  StringEnumMapper<E> withUnknownDefault(@Nonnull E unknownDefaultValue);
 }

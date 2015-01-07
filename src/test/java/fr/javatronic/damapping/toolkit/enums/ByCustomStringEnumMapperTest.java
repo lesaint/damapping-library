@@ -23,7 +23,7 @@ import static fr.javatronic.damapping.toolkit.enums.StringEnumMappers.map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * ByCustomStringEnumMapperTest - Unit tests for class mapping an enum to and from a String by the some custom
+ * ByStringEnumMapperTest - Unit tests for class mapping an enum to and from a String by the some custom
  * &transformation.
  *
  * @author Sébastien Lesaint
@@ -42,7 +42,7 @@ public class ByCustomStringEnumMapperTest {
 
   @Test
   public void toString_returns_transform_value() throws Exception {
-    CustomStringEnumMapper<EnumA> mapper = map(EnumA.class).by(CustomEnumAToString.INSTANCE);
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).by(CustomEnumAToString.INSTANCE);
 
     for (EnumA enumA : EnumA.values()) {
       assertThat(mapper.toString(enumA)).isEqualTo(CustomEnumAToString.INSTANCE.transform(enumA));
@@ -56,7 +56,7 @@ public class ByCustomStringEnumMapperTest {
 
   @Test
   public void toEnum_returns_enum_value_for_exact_string_value() throws Exception {
-    CustomStringEnumMapper<EnumA> mapper = map(EnumA.class).by(CustomEnumAToString.INSTANCE);
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).by(CustomEnumAToString.INSTANCE);
 
     for (EnumA enumA : EnumA.values()) {
       assertThat(mapper.toEnum(CustomEnumAToString.INSTANCE.transform(enumA))).isEqualTo(enumA);
@@ -75,7 +75,7 @@ public class ByCustomStringEnumMapperTest {
 
   @Test
   public void toEnum_returns_null_for_case_does_not_match() throws Exception {
-    CustomStringEnumMapper<EnumA> mapper = map(EnumA.class).by(CustomEnumAToString.INSTANCE);
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).by(CustomEnumAToString.INSTANCE);
 
     for (EnumA enumA : EnumA.values()) {
       assertThat(mapper.toEnum(CustomEnumAToString.INSTANCE.transform(enumA).toUpperCase())).isNull();
