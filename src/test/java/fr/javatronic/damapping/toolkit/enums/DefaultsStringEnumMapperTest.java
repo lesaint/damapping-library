@@ -15,6 +15,8 @@
  */
 package fr.javatronic.damapping.toolkit.enums;
 
+import fr.javatronic.damapping.toolkit.MappingDefaults;
+
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -29,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class DefaultsStringEnumMapperTest<T extends Enum<T>> {
   private static final String DEFAULT_STRING_VALUE = "default";
-  private static final String UNKNOWN_ENUM_NAME = "acme";
+  private static final String UNKNOWN_ENUM_NAME = "unknown_enum_name";
 
   @Test(dataProvider = "stringEnumMappers_withDefault_string")
   public void withDefault_returns_default_value_when_enum_is_null(StringEnumMapper<T> mapper) throws Exception {
@@ -47,7 +49,7 @@ public class DefaultsStringEnumMapperTest<T extends Enum<T>> {
     };
   }
 
-  @Test(dataProvider = "stringEnumMappers_withDefault_enum")
+  @Test(dataProvider = "stringEnumMappers_withSameDefault_for_all_cases")
   public void withDefault_returns_default_value_when_enum_is_null_empty_or_unknown(StringEnumMapper<T> mapper)
       throws Exception {
     assertThat(mapper.toEnum(null)).isEqualTo(VALUE_1);
@@ -61,23 +63,61 @@ public class DefaultsStringEnumMapperTest<T extends Enum<T>> {
    * {@link EnumA#VALUE_1} for every case where source enum value can not be mapped.
    */
   @DataProvider
-  public StringEnumMapper[][] stringEnumMappers_withDefault_enum() {
+  public StringEnumMapper[][] stringEnumMappers_withSameDefault_for_all_cases() {
+    MappingDefaults<EnumA> alldefaultsToVALUE_1 = MappingDefaults.defaultTo(VALUE_1);
+
     return new StringEnumMapper[][]{
         {byName().withDefault(VALUE_1)},
         {byNameIgnoreCase().withDefault(VALUE_1)},
+        {byToString().withDefault(VALUE_1)},
+        {byToStringIgnoreCase().withDefault(VALUE_1)},
+        {byCustom().withDefault(VALUE_1)},
+        {byCustomIgnoreCase().withDefault(VALUE_1)},
         {byName().withNullDefault(VALUE_1).withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1)},
         {byName().withNullDefault(VALUE_1).withUnknownDefault(VALUE_1).withEmptyDefault(VALUE_1)},
         {byName().withEmptyDefault(VALUE_1).withNullDefault(VALUE_1).withUnknownDefault(VALUE_1)},
         {byName().withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1).withNullDefault(VALUE_1)},
         {byName().withUnknownDefault(VALUE_1).withEmptyDefault(VALUE_1).withNullDefault(VALUE_1)},
         {byName().withUnknownDefault(VALUE_1).withNullDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byToString().withNullDefault(VALUE_1).withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1)},
+        {byToString().withNullDefault(VALUE_1).withUnknownDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byToString().withEmptyDefault(VALUE_1).withNullDefault(VALUE_1).withUnknownDefault(VALUE_1)},
+        {byToString().withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byToString().withUnknownDefault(VALUE_1).withEmptyDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byToString().withUnknownDefault(VALUE_1).withNullDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byCustom().withNullDefault(VALUE_1).withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1)},
+        {byCustom().withNullDefault(VALUE_1).withUnknownDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byCustom().withEmptyDefault(VALUE_1).withNullDefault(VALUE_1).withUnknownDefault(VALUE_1)},
+        {byCustom().withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byCustom().withUnknownDefault(VALUE_1).withEmptyDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byCustom().withUnknownDefault(VALUE_1).withNullDefault(VALUE_1).withEmptyDefault(VALUE_1)},
         {byNameIgnoreCase().withNullDefault(VALUE_1).withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1)},
         {byNameIgnoreCase().withNullDefault(VALUE_1).withUnknownDefault(VALUE_1).withEmptyDefault(VALUE_1)},
         {byNameIgnoreCase().withUnknownDefault(VALUE_1).withNullDefault(VALUE_1).withEmptyDefault(VALUE_1)},
         {byNameIgnoreCase().withEmptyDefault(VALUE_1).withNullDefault(VALUE_1).withUnknownDefault(VALUE_1)},
         {byNameIgnoreCase().withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1).withNullDefault(VALUE_1)},
         {byNameIgnoreCase().withUnknownDefault(VALUE_1).withEmptyDefault(VALUE_1).withNullDefault(VALUE_1)},
-        {byNameIgnoreCase().withUnknownDefault(VALUE_1).withNullDefault(VALUE_1).withEmptyDefault(VALUE_1)}
+        {byNameIgnoreCase().withUnknownDefault(VALUE_1).withNullDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byToStringIgnoreCase().withNullDefault(VALUE_1).withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1)},
+        {byToStringIgnoreCase().withNullDefault(VALUE_1).withUnknownDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byToStringIgnoreCase().withUnknownDefault(VALUE_1).withNullDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byToStringIgnoreCase().withEmptyDefault(VALUE_1).withNullDefault(VALUE_1).withUnknownDefault(VALUE_1)},
+        {byToStringIgnoreCase().withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byToStringIgnoreCase().withUnknownDefault(VALUE_1).withEmptyDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byToStringIgnoreCase().withUnknownDefault(VALUE_1).withNullDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byCustomIgnoreCase().withNullDefault(VALUE_1).withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1)},
+        {byCustomIgnoreCase().withNullDefault(VALUE_1).withUnknownDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byCustomIgnoreCase().withUnknownDefault(VALUE_1).withNullDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byCustomIgnoreCase().withEmptyDefault(VALUE_1).withNullDefault(VALUE_1).withUnknownDefault(VALUE_1)},
+        {byCustomIgnoreCase().withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byCustomIgnoreCase().withUnknownDefault(VALUE_1).withEmptyDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byCustomIgnoreCase().withUnknownDefault(VALUE_1).withNullDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byName().withEnumDefaults(alldefaultsToVALUE_1)},
+        {byNameIgnoreCase().withEnumDefaults(alldefaultsToVALUE_1)},
+        {byToString().withEnumDefaults(alldefaultsToVALUE_1)},
+        {byToStringIgnoreCase().withEnumDefaults(alldefaultsToVALUE_1)},
+        {byCustom().withEnumDefaults(alldefaultsToVALUE_1)},
+        {byCustomIgnoreCase().withEnumDefaults(alldefaultsToVALUE_1)}
     };
   }
 
@@ -94,9 +134,20 @@ public class DefaultsStringEnumMapperTest<T extends Enum<T>> {
    */
   @DataProvider
   public StringEnumMapper[][] stringEnumMappers_withNullDefault_enum() {
+    MappingDefaults<EnumA> nulldefaultsToVALUE_1 = MappingDefaults.<EnumA>defaultToNull().withNullDefault(VALUE_1);
     return new StringEnumMapper[][]{
         {byName().withNullDefault(VALUE_1)},
         {byNameIgnoreCase().withNullDefault(VALUE_1)},
+        {byToString().withNullDefault(VALUE_1)},
+        {byToStringIgnoreCase().withNullDefault(VALUE_1)},
+        {byCustom().withNullDefault(VALUE_1)},
+        {byToStringIgnoreCase().withNullDefault(VALUE_1)},
+        {byName().withEnumDefaults(nulldefaultsToVALUE_1)},
+        {byNameIgnoreCase().withEnumDefaults(nulldefaultsToVALUE_1)},
+        {byToString().withEnumDefaults(nulldefaultsToVALUE_1)},
+        {byToStringIgnoreCase().withEnumDefaults(nulldefaultsToVALUE_1)},
+        {byCustom().withEnumDefaults(nulldefaultsToVALUE_1)},
+        {byCustomIgnoreCase().withEnumDefaults(nulldefaultsToVALUE_1)}
     };
   }
 
@@ -113,9 +164,20 @@ public class DefaultsStringEnumMapperTest<T extends Enum<T>> {
    */
   @DataProvider
   public StringEnumMapper[][] stringEnumMappers_withEmptyDefault_enum() {
+    MappingDefaults<EnumA> emptydefaultsToVALUE_1 = MappingDefaults.<EnumA>defaultToNull().withEmptyDefault(VALUE_1);
     return new StringEnumMapper[][]{
         {byName().withEmptyDefault(VALUE_1)},
         {byNameIgnoreCase().withEmptyDefault(VALUE_1)},
+        {byToString().withEmptyDefault(VALUE_1)},
+        {byToStringIgnoreCase().withEmptyDefault(VALUE_1)},
+        {byCustom().withEmptyDefault(VALUE_1)},
+        {byCustomIgnoreCase().withEmptyDefault(VALUE_1)},
+        {byName().withEnumDefaults(emptydefaultsToVALUE_1)},
+        {byNameIgnoreCase().withEnumDefaults(emptydefaultsToVALUE_1)},
+        {byToString().withEnumDefaults(emptydefaultsToVALUE_1)},
+        {byToStringIgnoreCase().withEnumDefaults(emptydefaultsToVALUE_1)},
+        {byCustom().withEnumDefaults(emptydefaultsToVALUE_1)},
+        {byCustomIgnoreCase().withEnumDefaults(emptydefaultsToVALUE_1)}
     };
   }
 
@@ -132,9 +194,20 @@ public class DefaultsStringEnumMapperTest<T extends Enum<T>> {
    */
   @DataProvider
   public StringEnumMapper[][] stringEnumMappers_withUnknownDefault_enum() {
+    MappingDefaults<EnumA> unknwondefaultsToVALUE_1 = MappingDefaults.<EnumA>defaultToNull().withUnknownDefault(VALUE_1);
     return new StringEnumMapper[][]{
         {byName().withUnknownDefault(VALUE_1)},
         {byNameIgnoreCase().withUnknownDefault(VALUE_1)},
+        {byToString().withUnknownDefault(VALUE_1)},
+        {byToStringIgnoreCase().withUnknownDefault(VALUE_1)},
+        {byCustom().withUnknownDefault(VALUE_1)},
+        {byCustomIgnoreCase().withUnknownDefault(VALUE_1)},
+        {byName().withEnumDefaults(unknwondefaultsToVALUE_1)},
+        {byNameIgnoreCase().withEnumDefaults(unknwondefaultsToVALUE_1)},
+        {byToString().withEnumDefaults(unknwondefaultsToVALUE_1)},
+        {byToStringIgnoreCase().withEnumDefaults(unknwondefaultsToVALUE_1)},
+        {byCustom().withEnumDefaults(unknwondefaultsToVALUE_1)},
+        {byCustomIgnoreCase().withEnumDefaults(unknwondefaultsToVALUE_1)}
     };
   }
 
@@ -153,11 +226,26 @@ public class DefaultsStringEnumMapperTest<T extends Enum<T>> {
    */
   @DataProvider
   public StringEnumMapper[][] stringEnumMappers_withNullDefault_withEmptyDefault_enum() {
+    MappingDefaults<EnumA> defaults = MappingDefaults.<EnumA>defaultToNull().withNullDefault(VALUE_1).withEmptyDefault(VALUE_1);
     return new StringEnumMapper[][]{
         {byName().withNullDefault(VALUE_1).withEmptyDefault(VALUE_1)},
         {byName().withEmptyDefault(VALUE_1).withNullDefault(VALUE_1)},
         {byNameIgnoreCase().withNullDefault(VALUE_1).withEmptyDefault(VALUE_1)},
         {byNameIgnoreCase().withEmptyDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byToString().withNullDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byToString().withEmptyDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byToStringIgnoreCase().withNullDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byToStringIgnoreCase().withEmptyDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byCustom().withNullDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byCustom().withEmptyDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byCustomIgnoreCase().withNullDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byCustomIgnoreCase().withEmptyDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byName().withEnumDefaults(defaults)},
+        {byNameIgnoreCase().withEnumDefaults(defaults)},
+        {byToString().withEnumDefaults(defaults)},
+        {byToStringIgnoreCase().withEnumDefaults(defaults)},
+        {byCustom().withEmptyDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byCustomIgnoreCase().withEnumDefaults(defaults)},
     };
   }
 
@@ -176,11 +264,28 @@ public class DefaultsStringEnumMapperTest<T extends Enum<T>> {
    */
   @DataProvider
   public StringEnumMapper[][] stringEnumMappers_withNullDefault_withUnknownDefault_enum() {
+    MappingDefaults<EnumA> defaults = MappingDefaults.<EnumA>defaultToNull().withNullDefault(VALUE_1).withUnknownDefault(
+        VALUE_1
+    );
     return new StringEnumMapper[][]{
         {byName().withNullDefault(VALUE_1).withUnknownDefault(VALUE_1)},
         {byName().withUnknownDefault(VALUE_1).withNullDefault(VALUE_1)},
         {byNameIgnoreCase().withNullDefault(VALUE_1).withUnknownDefault(VALUE_1)},
         {byNameIgnoreCase().withUnknownDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byToString().withNullDefault(VALUE_1).withUnknownDefault(VALUE_1)},
+        {byToString().withUnknownDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byToStringIgnoreCase().withNullDefault(VALUE_1).withUnknownDefault(VALUE_1)},
+        {byToStringIgnoreCase().withUnknownDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byCustom().withNullDefault(VALUE_1).withUnknownDefault(VALUE_1)},
+        {byCustom().withUnknownDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byCustomIgnoreCase().withNullDefault(VALUE_1).withUnknownDefault(VALUE_1)},
+        {byCustomIgnoreCase().withUnknownDefault(VALUE_1).withNullDefault(VALUE_1)},
+        {byName().withEnumDefaults(defaults)},
+        {byNameIgnoreCase().withEnumDefaults(defaults)},
+        {byToString().withEnumDefaults(defaults)},
+        {byToStringIgnoreCase().withEnumDefaults(defaults)},
+        {byCustom().withEnumDefaults(defaults)},
+        {byCustomIgnoreCase().withEnumDefaults(defaults)},
     };
   }
 
@@ -199,11 +304,26 @@ public class DefaultsStringEnumMapperTest<T extends Enum<T>> {
    */
   @DataProvider
   public StringEnumMapper[][] stringEnumMappers_withEmptyDefault_withUnknownDefault_enum() {
+    MappingDefaults<EnumA> defaults = MappingDefaults.<EnumA>defaultToNull().withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1);
     return new StringEnumMapper[][]{
         {byName().withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1)},
         {byName().withUnknownDefault(VALUE_1).withEmptyDefault(VALUE_1)},
         {byNameIgnoreCase().withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1)},
         {byNameIgnoreCase().withUnknownDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byToString().withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1)},
+        {byToString().withUnknownDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byToStringIgnoreCase().withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1)},
+        {byToStringIgnoreCase().withUnknownDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byCustom().withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1)},
+        {byCustom().withUnknownDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byCustomIgnoreCase().withEmptyDefault(VALUE_1).withUnknownDefault(VALUE_1)},
+        {byCustomIgnoreCase().withUnknownDefault(VALUE_1).withEmptyDefault(VALUE_1)},
+        {byName().withEnumDefaults(defaults)},
+        {byNameIgnoreCase().withEnumDefaults(defaults)},
+        {byToString().withEnumDefaults(defaults)},
+        {byToStringIgnoreCase().withEnumDefaults(defaults)},
+        {byCustom().withEnumDefaults(defaults)},
+        {byCustomIgnoreCase().withEnumDefaults(defaults)},
     };
   }
 
@@ -216,5 +336,21 @@ public class DefaultsStringEnumMapperTest<T extends Enum<T>> {
 
   private static StringEnumMapper<EnumA> byNameIgnoreCase() {
     return byName().ignoreCase();
+  }
+
+  private static StringEnumMapper<EnumA> byToString() {
+    return map(EnumA.class).byToString();
+  }
+
+  private static StringEnumMapper<EnumA> byToStringIgnoreCase() {
+    return map(EnumA.class).byToString().ignoreCase();
+  }
+
+  private static StringEnumMapper<EnumA> byCustom() {
+    return map(EnumA.class).by(WeirdEnumATransformer.INSTANCE);
+  }
+
+  private static StringEnumMapper<EnumA> byCustomIgnoreCase() {
+    return map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).ignoreCase();
   }
 }

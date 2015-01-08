@@ -15,8 +15,6 @@
  */
 package fr.javatronic.damapping.toolkit.enums;
 
-import javax.annotation.Nonnull;
-
 import org.testng.annotations.Test;
 
 import static fr.javatronic.damapping.toolkit.enums.StringEnumMappers.map;
@@ -37,71 +35,50 @@ public class ByCustomStringEnumMapperTest {
    *========*/
   @Test
   public void toString_returns_null_for_null_value() throws Exception {
-    assertThat(map(EnumA.class).by(CustomEnumAToString.INSTANCE).toString(null)).isNull();
+    assertThat(map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).toString(null)).isNull();
   }
 
   @Test
   public void toString_returns_transform_value() throws Exception {
-    StringEnumMapper<EnumA> mapper = map(EnumA.class).by(CustomEnumAToString.INSTANCE);
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).by(WeirdEnumATransformer.INSTANCE);
 
     for (EnumA enumA : EnumA.values()) {
-      assertThat(mapper.toString(enumA)).isEqualTo(CustomEnumAToString.INSTANCE.transform(enumA));
+      assertThat(mapper.toString(enumA)).isEqualTo(WeirdEnumATransformer.INSTANCE.transform(enumA));
     }
   }
 
   @Test
   public void toEnum_returns_null_for_null_value() throws Exception {
-    assertThat(map(EnumA.class).by(CustomEnumAToString.INSTANCE).toEnum(null)).isNull();
+    assertThat(map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).toEnum(null)).isNull();
   }
 
   @Test
   public void toEnum_returns_enum_value_for_exact_string_value() throws Exception {
-    StringEnumMapper<EnumA> mapper = map(EnumA.class).by(CustomEnumAToString.INSTANCE);
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).by(WeirdEnumATransformer.INSTANCE);
 
     for (EnumA enumA : EnumA.values()) {
-      assertThat(mapper.toEnum(CustomEnumAToString.INSTANCE.transform(enumA))).isEqualTo(enumA);
+      assertThat(mapper.toEnum(WeirdEnumATransformer.INSTANCE.transform(enumA))).isEqualTo(enumA);
     }
   }
 
   @Test
   public void toEnum_returns_null_for_null_string() throws Exception {
-    assertThat(map(EnumA.class).by(CustomEnumAToString.INSTANCE).toEnum(null)).isNull();
+    assertThat(map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).toEnum(null)).isNull();
   }
 
   @Test
   public void toEnum_returns_null_for_empty_String() throws Exception {
-    assertThat(map(EnumA.class).by(CustomEnumAToString.INSTANCE).toEnum("")).isNull();
+    assertThat(map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).toEnum("")).isNull();
   }
 
   @Test
   public void toEnum_returns_null_for_case_does_not_match() throws Exception {
-    StringEnumMapper<EnumA> mapper = map(EnumA.class).by(CustomEnumAToString.INSTANCE);
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).by(WeirdEnumATransformer.INSTANCE);
 
     for (EnumA enumA : EnumA.values()) {
-      assertThat(mapper.toEnum(CustomEnumAToString.INSTANCE.transform(enumA).toUpperCase())).isNull();
+      assertThat(mapper.toEnum(WeirdEnumATransformer.INSTANCE.transform(enumA).toUpperCase())).isNull();
     }
     assertThat(mapper.toEnum(DUMMY_STRING_VALUE)).isNull();
   }
 
-  /*===========*
-   * utilities *
-   *===========*/
-  private static enum CustomEnumAToString implements EnumToString<EnumA> {
-    INSTANCE;
-
-    @Nonnull
-    @Override
-    public String transform(@Nonnull EnumA enumValue) {
-      switch (enumValue) {
-        case VALUE_1:
-          return "Foo";
-        case VALUE_2:
-          return "Bar";
-        case VALUE_3:
-          return "Acme";
-        default:
-          throw new IllegalArgumentException("value is not supported in toString(), fix toString(): " + enumValue);
-      }
-    }
-  }
 }
