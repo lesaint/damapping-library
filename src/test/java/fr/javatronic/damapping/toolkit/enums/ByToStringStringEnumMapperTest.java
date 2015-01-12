@@ -108,7 +108,7 @@ public class ByToStringStringEnumMapperTest {
   }
 
   @Test
-  public void map_byToString_ignoreCase_toEnum_returns_value_when_case_does_not_match() throws Exception {
+  public void map_byToString_ignoreCase_toEnum_returns_enum_when_case_does_not_match() throws Exception {
     StringEnumMapper<EnumA> mapper = map(EnumA.class).byToString().ignoreCase();
 
     for (EnumA enumA : EnumA.values()) {

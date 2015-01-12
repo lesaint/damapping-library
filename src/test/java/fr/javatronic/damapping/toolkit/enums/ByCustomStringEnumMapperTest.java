@@ -81,4 +81,42 @@ public class ByCustomStringEnumMapperTest {
     assertThat(mapper.toEnum(DUMMY_STRING_VALUE)).isNull();
   }
 
+  /*=====================*
+   * byCustom ignoreCase *
+   *=====================*/
+  @Test
+  public void map_byCustom_ignoreCase_toString_returns_null_for_null_value() throws Exception {
+    assertThat(map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).ignoreCase().toString(null)).isNull();
+  }
+
+  @Test
+  public void map_byCustom_ignoreCase_toString_returns_name_value() throws Exception {
+    for (EnumA enumA : EnumA.values()) {
+      assertThat(
+          map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).ignoreCase().toString(enumA)
+      ).isEqualTo(WeirdEnumATransformer.INSTANCE.transform(enumA));
+    }
+  }
+
+  @Test
+  public void map_byCustom_ignoreCase_toEnum_returns_null_for_null_value() throws Exception {
+    assertThat(map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).ignoreCase().toEnum(null)).isNull();
+  }
+
+  @Test
+  public void map_byCustom_ignoreCase_toEnum_returns_enum_when_case_does_not_match() throws Exception {
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).ignoreCase();
+
+    for (EnumA enumA : EnumA.values()) {
+      assertThat(mapper.toEnum(WeirdEnumATransformer.INSTANCE.transform(enumA).toLowerCase())).isEqualTo(enumA);
+    }
+  }
+
+  @Test
+  public void map_byCustom_ignoreCase_returns_itself_as_ignoreCase_returned_value() throws Exception {
+    StringEnumMapper<EnumA> mapper = map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).ignoreCase();
+
+    assertThat(mapper.ignoreCase()).isSameAs(mapper);
+  }
+
 }

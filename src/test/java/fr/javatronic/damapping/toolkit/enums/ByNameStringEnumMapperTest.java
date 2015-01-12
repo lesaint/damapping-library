@@ -40,7 +40,9 @@ public class ByNameStringEnumMapperTest {
 
   @Test
   public void map_byName_toString_returns_name_value() throws Exception {
-    mapper_toString_returns_name_value(map(EnumA.class).byName());
+    for (EnumA enumA : EnumA.values()) {
+      assertThat(map(EnumA.class).byName().toString(enumA)).isEqualTo(enumA.name());
+    }
   }
 
   @Test
@@ -82,7 +84,9 @@ public class ByNameStringEnumMapperTest {
 
   @Test
   public void map_byName_ignoreCase_toString_returns_name_value() throws Exception {
-    mapper_toString_returns_name_value(map(EnumA.class).byName().ignoreCase());
+    for (EnumA enumA : EnumA.values()) {
+      assertThat(map(EnumA.class).byName().ignoreCase().toString(enumA)).isEqualTo(enumA.name());
+    }
   }
 
   @Test
@@ -91,7 +95,7 @@ public class ByNameStringEnumMapperTest {
   }
 
   @Test
-  public void map_byName_ignoreCase_toEnum_returns_name_when_case_does_not_match() throws Exception {
+  public void map_byName_ignoreCase_toEnum_returns_enum_when_case_does_not_match() throws Exception {
     StringEnumMapper<EnumA> mapper = map(EnumA.class).byName().ignoreCase();
 
     for (EnumA enumA : EnumA.values()) {
@@ -104,28 +108,6 @@ public class ByNameStringEnumMapperTest {
     StringEnumMapper<EnumA> mapper = map(EnumA.class).byName().ignoreCase();
 
     assertThat(mapper.ignoreCase()).isSameAs(mapper);
-  }
-
-  /*=====================*
-   * byName with default *
-   *=====================*/
-  @Test
-  public void map_byName_withDefault_String_toString_returns_default_string_for_null_value() throws Exception {
-    assertThat(map(EnumA.class).byName().withDefault(DEFAULT_STRING).toString(null)).isEqualTo(DEFAULT_STRING);
-  }
-
-  @Test
-  public void map_byName_withDefault_String_toString_returns_default_string_returns_name_value() throws Exception {
-    mapper_toString_returns_name_value(map(EnumA.class).byName().withDefault(DEFAULT_STRING));
-  }
-
-  /*==========*
-  * utilities *
-   *==========*/
-  private void mapper_toString_returns_name_value(StringEnumMapper<EnumA> mapper) {
-    for (EnumA enumA : EnumA.values()) {
-      assertThat(mapper.toString(enumA)).isEqualTo(enumA.name());
-    }
   }
 
 }
