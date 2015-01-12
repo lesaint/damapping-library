@@ -77,11 +77,11 @@ public abstract class ToArrayMapper {
    * @param defaultValue a array of {@code T} or {@code null}
    * @param <T>          a type
    *
-   * @return a array of type {@code T}
+   * @return a array of type {@code T} or {@code null}
    *
    * @throws NullPointerException if the {@code defaultValue} is {@code null}
    */
-  @Nonnull
+  @Nullable
   public static <T> T[] toArray(@Nullable Collection<T> collection, @Nullable T[] defaultValue) {
     return toArray(collection, defaultTo(defaultValue));
   }
@@ -111,6 +111,7 @@ public abstract class ToArrayMapper {
    * @see #defaultToEmpty()
    * @see #defaultToNull()
    */
+  @Nullable
   public static <T> T[] toArray(@Nullable Collection<T> collection,
                                 @Nonnull MappingDefaults<T[]> defaultValue) {
     Objects.requireNonNull(defaultValue);
@@ -146,6 +147,7 @@ public abstract class ToArrayMapper {
    *
    * @return a {@link MappingDefaults}
    */
+  @Nonnull
   public static <T> MappingDefaults<T[]> defaultToNull() {
     return nullArrayDefaultsImpl();
   }
@@ -171,6 +173,7 @@ public abstract class ToArrayMapper {
    *
    * @return a {@link MappingDefaults}
    */
+  @Nonnull
   public static <T> MappingDefaults<T[]> defaultToEmpty() {
     return emptyArrayDefaultsImpl();
   }
