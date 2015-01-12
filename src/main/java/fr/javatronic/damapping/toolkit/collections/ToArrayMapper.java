@@ -25,14 +25,14 @@ import javax.annotation.Nullable;
 import static fr.javatronic.damapping.toolkit.MappingDefaults.defaultTo;
 
 /**
- * CollectionArrayMapper - This class provides the developer with a convenient way to map a Collection from and to
- * an array.
+ * ToArrayMapper - This class provides the developer with a convenient way to map Collection, Iterable, etc.
+ * to an array.
  * <p/>
  * TODO: java8 add ToArrayOptional
  *
  * @author Sébastien Lesaint
  */
-public abstract class CollectionArrayMapper {
+public abstract class ToArrayMapper {
   private static final MappingDefaults<?> EMPTY_ARRAY_DEFAULTS = defaultTo(new Object[0]);
 
   /**
@@ -138,7 +138,7 @@ public abstract class CollectionArrayMapper {
    * <p>
    * This method can also be used to create a MappingDefaults that returns an {@code null} array in only one case. eg.:
    * <pre>
-   * MappingDefaults<String[]> defaults = CollectionArrayMapper.<String>defaultToNull().withEmptyDefault(new String[]{"ERROR"});
+   * MappingDefaults<String[]> defaults = ToArrayMapper.<String>defaultToNull().withEmptyDefault(new String[]{"ERROR"});
    * </pre>
    * </p>
    *
@@ -163,7 +163,7 @@ public abstract class CollectionArrayMapper {
    * <p>
    * This method can also be used to create a MappingDefaults that returns an empty array in only one case. eg.:
    * <pre>
-   * MappingDefaults<String[]> defaults = CollectionArrayMapper.<String>defaultToEmpty().withNullDefault(null);
+   * MappingDefaults<String[]> defaults = ToArrayMapper.<String>defaultToEmpty().withNullDefault(null);
    * </pre>
    * </p>
    *

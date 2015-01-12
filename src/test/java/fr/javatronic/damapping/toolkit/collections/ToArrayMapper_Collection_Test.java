@@ -29,17 +29,17 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.testng.collections.Sets;
 
-import static fr.javatronic.damapping.toolkit.collections.CollectionArrayMapper.defaultToEmpty;
-import static fr.javatronic.damapping.toolkit.collections.CollectionArrayMapper.defaultToNull;
-import static fr.javatronic.damapping.toolkit.collections.CollectionArrayMapper.toArray;
+import static fr.javatronic.damapping.toolkit.collections.ToArrayMapper.defaultToEmpty;
+import static fr.javatronic.damapping.toolkit.collections.ToArrayMapper.defaultToNull;
+import static fr.javatronic.damapping.toolkit.collections.ToArrayMapper.toArray;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * CollectionArrayMapper_Collection_Test -
+ * ToArrayMapper_Collection_Test -
  *
  * @author Sébastien Lesaint
  */
-public class CollectionArrayMapper_Collection_Test {
+public class ToArrayMapper_Collection_Test {
 
   private static final List<String> STRING_LIST = Arrays.asList("A", "B", "C");
   private static final List<String> EMPTY_LIST = Collections.emptyList();
