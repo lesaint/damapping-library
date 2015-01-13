@@ -197,7 +197,11 @@ public abstract class ToArrayMapper {
    */
   @Nullable
   public static <T> T[] toArray(@Nullable T obj, @Nullable T[] defaultValue) {
-    return toArray(obj, defaultTo(defaultValue));
+    if (obj == null) {
+      return defaultValue;
+    }
+
+    return toArrayImpl(obj);
   }
 
   /**
@@ -314,32 +318,6 @@ public abstract class ToArrayMapper {
     }
 
     return new String[]{str};
-  }
-
-  /**
-   * Transforms an object of any type into an array of that type with a single value, the specified object.
-   * <p>
-   * This method returns the result of the method {@link MappingDefaults#whenNull()} of the specified
-   * {@link MappingDefaults} instance when the object is {@code null].
-   * </p>
-   *
-   * @param obj          an object of type {@code T} or {@code null}
-   * @param defaultValue a {@link MappingDefaults}
-   * @param <T>          any type
-   *
-   * @return a array of type {@code T} or {@code null}
-   *
-   * @throws NullPointerException when {@code defaultValue} is {@code null}
-   */
-  @Nullable
-  public static <T> T[] toArray(@Nullable T obj,
-                                @Nonnull MappingDefaults<T[]> defaultValue) {
-    requireNonNull(defaultValue);
-    if (obj == null) {
-      return defaultValue.whenNull();
-    }
-
-    return toArrayImpl(obj);
   }
 
   /**

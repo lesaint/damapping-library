@@ -15,8 +15,6 @@
  */
 package fr.javatronic.damapping.toolkit.collections;
 
-import fr.javatronic.damapping.toolkit.MappingDefaults;
-
 import org.testng.annotations.Test;
 
 import static fr.javatronic.damapping.toolkit.collections.ToArrayMapper.toArray;
@@ -40,22 +38,6 @@ public class ToArrayMapper_Object_Test {
   @Test
   public void toArray_with_default_from_object_returns_null_when_object_is_null() throws Exception {
     assertThat(toArray(NULL_OBJECT, (String[]) null)).isNull();
-  }
-
-  @Test(expectedExceptions = NullPointerException.class)
-  public void toArray_with_MappingDefaults_throws_NPE_if_MappingDefaults_is_null() throws Exception {
-    toArray(SOME_OBJECT, (MappingDefaults<Object[]>) null);
-  }
-
-  @Test
-  public void toArray_with_MappingDefaults_uses_whenNull_method_result() throws Exception {
-    Object[] nullDefault = {"NULL_COLLECTION"};
-    Object[] otherDefault = {"EMPTY_COLLECTION"};
-    MappingDefaults<Object[]> mappingDefaults = MappingDefaults.defaultTo(nullDefault)
-                                                               .withEmptyDefault(otherDefault)
-                                                               .withUnknownDefault(otherDefault);
-
-    assertThat(toArray(NULL_OBJECT, mappingDefaults)).isEqualTo(nullDefault);
   }
 
 }
