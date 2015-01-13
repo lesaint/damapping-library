@@ -90,14 +90,15 @@ import static java.util.Objects.requireNonNull;
  * <strong>Note on thread-safety:</strong> mapper produced by this class are thread-safe and can safely be shared,
  * stored in class property and/or be static.
  * </p>
- * <p/>
+ *
+ * @author Sébastien Lesaint
+ */
+/*
  * TODO use internal Map for case sensitive matching instead of loop to improve performance?
  * TODO add shorthand for case-sensitive matching on name with optional such as Guava's <T extends Enum<T>>
  * Optional<T> getIfPresent(Class<T>, String)
  * TODO Java8 support: make EnumToString a Functional interface, add methods returning optional instead of null? quid
  * of defaults?
- *
- * @author Sébastien Lesaint
  */
 public final class StringEnumMappers {
   private StringEnumMappers() {
@@ -113,7 +114,7 @@ public final class StringEnumMappers {
     /**
      * Builds a mapper that maps an enum value to and from a String that matches Strings to the {@link Enum#name()}.
      *
-     * @return a {@link fr.javatronic.damapping.toolkit.enums.StringEnumMapper} instance
+     * @return a {@link StringEnumMapper} instance
      */
     @Nonnull
     StringEnumMapper<T> byName();
@@ -121,7 +122,7 @@ public final class StringEnumMappers {
     /**
      * Builds a mapper that maps an enum value to and from a String that matches Strings to the {@link Enum#toString()}.
      *
-     * @return a {@link fr.javatronic.damapping.toolkit.enums.StringEnumMapper} instance
+     * @return a {@link StringEnumMapper} instance
      */
     @Nonnull
     StringEnumMapper<T> byToString();
@@ -132,7 +133,7 @@ public final class StringEnumMappers {
      *
      * @param transformer a {@link EnumToString} instance
      *
-     * @return a {@link fr.javatronic.damapping.toolkit.enums.StringEnumMapper} instance
+     * @return a {@link StringEnumMapper} instance
      *
      * @throws NullPointerException if the specified {@link EnumToString} instance is {@code null}
      */
@@ -186,9 +187,8 @@ public final class StringEnumMappers {
   }
 
   /**
-   * StringEnumMapperImpl -
-   *
-   * @author Sébastien Lesaint
+   * StringEnumMapperImpl - Implementation of StringEnumMapper interface which supports MappingDefaults and optionally
+   * using case insensitive comparison to match a String and the string representations of an enum.
    */
   private static class StringEnumMapperImpl<E extends Enum<E>> implements StringEnumMapper<E> {
     private static final String NUll_DEFAULT_VALUE_ERROR_MSG = "When specifying a default value, " +

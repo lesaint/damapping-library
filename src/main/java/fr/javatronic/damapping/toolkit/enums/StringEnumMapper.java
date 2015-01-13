@@ -59,9 +59,9 @@ public interface StringEnumMapper<E extends Enum<E>> {
    * Returns a mapper that will map an enum to and from a String the same way as the current mapper but will in
    * addition (or in place) use the specified defaults when mapping from a String.
    *
-   * @param defaults a {@link fr.javatronic.damapping.toolkit.MappingDefaults}
+   * @param defaults a {@link MappingDefaults}
    *
-   * @return a {@link fr.javatronic.damapping.toolkit.enums.StringEnumMapper}
+   * @return a {@link StringEnumMapper}
    */
   @Nonnull
   StringEnumMapper<E> withStringDefaults(@Nonnull MappingDefaults<String> defaults);
@@ -70,9 +70,9 @@ public interface StringEnumMapper<E extends Enum<E>> {
    * Returns a mapper that will map an enum to and from a String the same way as the current mapper but will in
    * addition (or in place) use the specified defaults when mapping from a enum.
    *
-   * @param defaults a {@link fr.javatronic.damapping.toolkit.MappingDefaults}
+   * @param defaults a {@link MappingDefaults}
    *
-   * @return a {@link fr.javatronic.damapping.toolkit.enums.StringEnumMapper}
+   * @return a {@link StringEnumMapper}
    */
   @Nonnull
   StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults);

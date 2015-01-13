@@ -21,11 +21,11 @@ import static fr.javatronic.damapping.toolkit.enums.StringEnumMappers.map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * ByNameStringEnumMapperTest - Unit tests for class mapping an enum to and from a String by the enum name method.
+ * StringEnumMappers_byName_Test - Unit tests for class mapping an enum to and from a String by the enum name method.
  *
  * @author Sébastien Lesaint
  */
-public class ByNameStringEnumMapperTest {
+public class StringEnumMappers_byName_Test {
 
   private static final String DUMMY_STRING_VALUE = "fooBarAcme";
   private static final String DEFAULT_STRING = "DEFAULT_STRING";

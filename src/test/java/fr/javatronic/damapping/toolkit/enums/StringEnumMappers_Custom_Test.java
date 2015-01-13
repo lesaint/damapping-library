@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Sébastien Lesaint
  */
-public class ByCustomStringEnumMapperTest {
+public class StringEnumMappers_Custom_Test {
 
   private static final String DUMMY_STRING_VALUE = "fooBarAcme";
 

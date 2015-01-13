@@ -27,11 +27,11 @@ import static fr.javatronic.damapping.toolkit.enums.StringEnumMappers.map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * DefaultsStringEnumMapperTest -
+ * StringEnumMapper_defaults_Test -
  *
  * @author Sébastien Lesaint
  */
-public class DefaultsStringEnumMapperTest<T extends Enum<T>> {
+public class StringEnumMapper_defaults_Test<T extends Enum<T>> {
   private static final String DEFAULT_STRING_VALUE = "default";
   private static final String UNKNOWN_ENUM_NAME = "unknown_enum_name";
 
