@@ -90,6 +90,27 @@ public abstract class ToArrayMapper {
     return toArray(str, MappingDefaults.defaultTo(EMPTY_STRING_ARRAY));
   }
 
+
+  /**
+   * Transforms an object of any type into an array of that type with a single value, the specified object.
+   * <p>
+   * This method returns an empty array when the object is {@code null].
+   * </p>
+   *
+   * @param obj an object of type {@code T} or {@code null}
+   * @param <T> any type
+   *
+   * @return a array of type {@code T} or {@code null}
+   */
+  @Nonnull
+  public static <T> T[] toArray(@Nullable T obj) {
+    if (obj == null) {
+      return emptyArray();
+    }
+
+    return toArrayImpl(obj);
+  }
+
   /**
    * Private method isolating SuppressWarnings annotation to the smallest piece of code possible.
    */
@@ -160,6 +181,23 @@ public abstract class ToArrayMapper {
   @Nullable
   public static String[] toArray(@Nullable String str, @Nullable String[] defaultValue) {
     return toArray(str, defaultTo(defaultValue));
+  }
+
+  /**
+   * Transforms an object of any type into an array of that type with a single value, the specified object.
+   * <p>
+   * This method returns the specified default value when the object is {@code null].
+   * </p>
+   *
+   * @param obj          an object of type {@code T} or {@code null}
+   * @param defaultValue an array of type {@code T} or {@code null}
+   * @param <T>          any type
+   *
+   * @return a array of type {@code T} or {@code null}
+   */
+  @Nullable
+  public static <T> T[] toArray(@Nullable T obj, @Nullable T[] defaultValue) {
+    return toArray(obj, defaultTo(defaultValue));
   }
 
   /**
@@ -278,6 +316,31 @@ public abstract class ToArrayMapper {
     return new String[]{str};
   }
 
+  /**
+   * Transforms an object of any type into an array of that type with a single value, the specified object.
+   * <p>
+   * This method returns the result of the method {@link MappingDefaults#whenNull()} of the specified
+   * {@link MappingDefaults} instance when the object is {@code null].
+   * </p>
+   *
+   * @param obj          an object of type {@code T} or {@code null}
+   * @param defaultValue a {@link MappingDefaults}
+   * @param <T>          any type
+   *
+   * @return a array of type {@code T} or {@code null}
+   *
+   * @throws NullPointerException when {@code defaultValue} is {@code null}
+   */
+  @Nullable
+  public static <T> T[] toArray(@Nullable T obj,
+                                @Nonnull MappingDefaults<T[]> defaultValue) {
+    requireNonNull(defaultValue);
+    if (obj == null) {
+      return defaultValue.whenNull();
+    }
+
+    return toArrayImpl(obj);
+  }
 
   /**
    * Creates a MappingDefaults that returns a {@code null} array of type {@code T} in every case.
