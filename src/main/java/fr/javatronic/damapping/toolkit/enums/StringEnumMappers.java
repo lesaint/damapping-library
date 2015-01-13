@@ -275,13 +275,6 @@ public final class StringEnumMappers {
 
     @Nonnull
     @Override
-    public StringEnumMapper<E> withStringDefaults(@Nonnull MappingDefaults<String> defaults) {
-      requireNonNull(defaults, NUll_MAPPING_DEFAULTS_ERROR_MSG);
-      return new StringEnumMapperImpl<E>(clazz, transformer, defaults, this.enumDefaults, ignoreCase);
-    }
-
-    @Nonnull
-    @Override
     public StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
       requireNonNull(defaults, NUll_MAPPING_DEFAULTS_ERROR_MSG);
       return new StringEnumMapperImpl<E>(clazz, transformer, this.stringDefaults, defaults, ignoreCase);
