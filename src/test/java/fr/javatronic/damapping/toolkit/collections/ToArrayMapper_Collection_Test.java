@@ -29,8 +29,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.testng.collections.Sets;
 
-import static fr.javatronic.damapping.toolkit.collections.ToArrayMapper.defaultToEmpty;
-import static fr.javatronic.damapping.toolkit.collections.ToArrayMapper.defaultToNull;
 import static fr.javatronic.damapping.toolkit.collections.ToArrayMapper.toArray;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -105,9 +103,6 @@ public class ToArrayMapper_Collection_Test {
     assertThat(toArray(emptyCollection, defaultValue)).isSameAs(defaultValue);
   }
 
-  /*=================*
-   * MappingDefaults *
-   *=================*/
   @Test(expectedExceptions = NullPointerException.class)
   public void toArray_with_MappingDefaults_throws_NPE_if_MappingDefaults_is_null() throws Exception {
     toArray(STRING_LIST, (MappingDefaults<String[]>) null);
@@ -122,17 +117,5 @@ public class ToArrayMapper_Collection_Test {
 
     assertThat(toArray(NULL_STRING_COLLECTION, mappingDefaults)).isEqualTo(nullDefault);
     assertThat(toArray(EMPTY_LIST, mappingDefaults)).isEqualTo(emptyDefault);
-  }
-
-  @Test
-  public void defaultToNull_returns_MappingDefaults_with_null_defaults() throws Exception {
-    assertThat(defaultToNull().whenNull()).isNull();
-    assertThat(defaultToNull().whenEmpty()).isNull();
-  }
-
-  @Test
-  public void defaultToEmpty_returns_MappingDefaults_with_empty_array_defaults() throws Exception {
-    assertThat(defaultToEmpty().whenNull()).isEmpty();
-    assertThat(defaultToEmpty().whenEmpty()).isEmpty();
   }
 }

@@ -79,9 +79,6 @@ public class ToArrayMapper_Iterable_Test {
     assertThat(toArray(new EmptyIterable<String>(), defaultValue)).isSameAs(defaultValue);
   }
 
-  /*=================*
-   * MappingDefaults *
-   *=================*/
   @Test(expectedExceptions = NullPointerException.class)
   public void toArray_with_MappingDefaults_throws_NPE_if_MappingDefaults_is_null() throws Exception {
     toArray(STRING_ITERABLE, (MappingDefaults<String[]>) null);
@@ -99,6 +96,9 @@ public class ToArrayMapper_Iterable_Test {
     assertThat(toArray(new EmptyIterable<String>(), mappingDefaults)).isEqualTo(emptyDefault);
   }
 
+  /*=======*
+   * utils *
+   *=======*/
   private static class EmptyIterable<T> implements Iterable<T> {
     @Override
     public Iterator<T> iterator() {
