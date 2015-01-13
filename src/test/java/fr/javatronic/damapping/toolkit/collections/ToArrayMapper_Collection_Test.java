@@ -50,33 +50,35 @@ public class ToArrayMapper_Collection_Test {
   }
 
   @Test(dataProvider = "empty_collections")
-  public <T> void toArray_from_collection_returns_empty_array_from_empty_collection(Collection<T> collection) throws Exception {
+  public <T> void toArray_from_collection_returns_empty_array_from_empty_collection(Collection<T> collection)
+      throws Exception {
     assertThat(toArray(collection)).isEmpty();
   }
 
   @DataProvider
   public <T> Object[][] empty_collections() {
-    return new Object[][] {
+    return new Object[][]{
         {new ArrayList<T>()},
         {new LinkedList<T>()},
-        {Sets.<T>newHashSet() },
-        {new LinkedHashSet<T>() },
+        {Sets.<T>newHashSet()},
+        {new LinkedHashSet<T>()},
     };
   }
 
   @SuppressWarnings("unchecked")
   @Test(dataProvider = "non_empty_collections")
-  public <T> void toArray_from_collection_returns_array_from_Collection_toArray_method(Collection<T> collection) throws Exception {
+  public <T> void toArray_from_collection_returns_array_from_Collection_toArray_method(Collection<T> collection)
+      throws Exception {
     assertThat(toArray(collection)).containsExactly((T[]) collection.toArray());
   }
 
   @DataProvider
   public Object[][] non_empty_collections() {
-    return new Object[][] {
+    return new Object[][]{
         {STRING_LIST},
         {new LinkedList<>(STRING_LIST)},
-        {Sets.newHashSet(STRING_LIST) },
-        {new LinkedHashSet<>(STRING_LIST) },
+        {Sets.newHashSet(STRING_LIST)},
+        {new LinkedHashSet<>(STRING_LIST)},
     };
   }
 
@@ -88,14 +90,15 @@ public class ToArrayMapper_Collection_Test {
 
   @Test
   public void toArray_with_default_returns_default_from_null_collection() throws Exception {
-    String[] defaultValue = new String[] { "default" };
+    String[] defaultValue = new String[]{"default"};
 
     assertThat(toArray(null, defaultValue)).isSameAs(defaultValue);
   }
 
   @Test(dataProvider = "empty_collections")
-  public void toArray_with_default_returns_default_from_empty_collections(Collection<String> emptyCollection) throws Exception {
-    String[] defaultValue = new String[] { "default" };
+  public void toArray_with_default_returns_default_from_empty_collections(Collection<String> emptyCollection)
+      throws Exception {
+    String[] defaultValue = new String[]{"default"};
 
     assertThat(toArray(emptyCollection, defaultValue)).isSameAs(defaultValue);
   }
