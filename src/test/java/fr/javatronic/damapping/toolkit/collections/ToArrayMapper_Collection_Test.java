@@ -41,12 +41,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ToArrayMapper_Collection_Test {
 
+  private static final Collection<String> NULL_STRING_COLLECTION = (Collection<String>) null;
   private static final List<String> STRING_LIST = Arrays.asList("A", "B", "C");
   private static final List<String> EMPTY_LIST = Collections.emptyList();
+  private static final String[] NULL_STRING_ARRAY = (String[]) null;
 
   @Test
   public void toArray_from_collection_returns_empty_array_from_null_collection() throws Exception {
-    assertThat(toArray(null)).isEmpty();
+    assertThat(toArray((Collection<?>) null)).isEmpty();
   }
 
   @Test(dataProvider = "empty_collections")
@@ -84,15 +86,15 @@ public class ToArrayMapper_Collection_Test {
 
   @Test
   public void toArray_with_default_from_collection_returns_null_when_collection_is_null_or_empty() throws Exception {
-    assertThat(toArray(null, (String[]) null)).isNull();
-    assertThat(toArray(EMPTY_LIST, (String[]) null)).isNull();
+    assertThat(toArray(NULL_STRING_COLLECTION, NULL_STRING_ARRAY)).isNull();
+    assertThat(toArray(EMPTY_LIST, NULL_STRING_ARRAY)).isNull();
   }
 
   @Test
   public void toArray_with_default_returns_default_from_null_collection() throws Exception {
     String[] defaultValue = new String[]{"default"};
 
-    assertThat(toArray(null, defaultValue)).isSameAs(defaultValue);
+    assertThat(toArray(NULL_STRING_COLLECTION, defaultValue)).isSameAs(defaultValue);
   }
 
   @Test(dataProvider = "empty_collections")
@@ -118,7 +120,7 @@ public class ToArrayMapper_Collection_Test {
     MappingDefaults<String[]> mappingDefaults = MappingDefaults.defaultTo(nullDefault)
                                                                .withEmptyDefault(emptyDefault);
 
-    assertThat(toArray(null, mappingDefaults)).isEqualTo(nullDefault);
+    assertThat(toArray(NULL_STRING_COLLECTION, mappingDefaults)).isEqualTo(nullDefault);
     assertThat(toArray(EMPTY_LIST, mappingDefaults)).isEqualTo(emptyDefault);
   }
 

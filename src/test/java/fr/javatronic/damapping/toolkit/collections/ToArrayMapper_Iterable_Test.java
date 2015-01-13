@@ -23,14 +23,14 @@ import java.util.List;
 
 import org.testng.annotations.Test;
 
-import static fr.javatronic.damapping.toolkit.collections.ToArrayMapper.defaultToEmpty;
-import static fr.javatronic.damapping.toolkit.collections.ToArrayMapper.defaultToNull;
 import static fr.javatronic.damapping.toolkit.collections.ToArrayMapper.toArray;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class ToArrayMapper_Iterable_Test {
 
+  private static final Iterable<String> NULL_ITERABLE = (Iterable<String>) null;
+  private static final String[] NULL_STRING_ARRAY = (String[]) null;
   private static final List<String> STRING_ITERABLE_AS_LIST = Arrays.asList("A", "B", "C");
   private static final Iterable<String> STRING_ITERABLE = STRING_ITERABLE_AS_LIST;
 
@@ -50,8 +50,8 @@ public class ToArrayMapper_Iterable_Test {
     assertThat(toArray(new EmptyIterable<String>())).isEmpty();
   }
 
-  @SuppressWarnings("unchecked")
   @Test
+  @SuppressWarnings("unchecked")
   public <T> void toArray_from_iterable_returns_array_from_Collection_in_order()
       throws Exception {
     assertThat(toArray(STRING_ITERABLE)).containsExactly((String[]) STRING_ITERABLE_AS_LIST.toArray());
@@ -59,16 +59,16 @@ public class ToArrayMapper_Iterable_Test {
 
   @Test
   public void toArray_with_default_from_iterable_returns_null_when_iterable_is_null_or_empty() throws Exception {
-    assertThat(toArray(null, (String[]) null)).isNull();
-    assertThat(toArray(new EmptyIterable<String>(), (String[]) null)).isNull();
-    assertThat(toArray(new NullIteratorIterable<String>(), (String[]) null)).isNull();
+    assertThat(toArray(NULL_ITERABLE, NULL_STRING_ARRAY)).isNull();
+    assertThat(toArray(new EmptyIterable<String>(), NULL_STRING_ARRAY)).isNull();
+    assertThat(toArray(new NullIteratorIterable<String>(), NULL_STRING_ARRAY)).isNull();
   }
 
   @Test
   public void toArray_with_default_returns_default_from_null_iterable() throws Exception {
     String[] defaultValue = new String[]{"default"};
 
-    assertThat(toArray(null, defaultValue)).isSameAs(defaultValue);
+    assertThat(toArray((Iterable<String>) null, defaultValue)).isSameAs(defaultValue);
   }
 
   @Test
@@ -94,21 +94,9 @@ public class ToArrayMapper_Iterable_Test {
     MappingDefaults<String[]> mappingDefaults = MappingDefaults.defaultTo(nullDefault)
                                                                .withEmptyDefault(emptyDefault);
 
-    assertThat(toArray(null, mappingDefaults)).isEqualTo(nullDefault);
+    assertThat(toArray(NULL_ITERABLE, mappingDefaults)).isEqualTo(nullDefault);
     assertThat(toArray(new NullIteratorIterable<String>(), mappingDefaults)).isEqualTo(nullDefault);
     assertThat(toArray(new EmptyIterable<String>(), mappingDefaults)).isEqualTo(emptyDefault);
-  }
-
-  @Test
-  public void defaultToNull_returns_MappingDefaults_with_null_defaults() throws Exception {
-    assertThat(defaultToNull().whenNull()).isNull();
-    assertThat(defaultToNull().whenEmpty()).isNull();
-  }
-
-  @Test
-  public void defaultToEmpty_returns_MappingDefaults_with_empty_array_defaults() throws Exception {
-    assertThat(defaultToEmpty().whenNull()).isEmpty();
-    assertThat(defaultToEmpty().whenEmpty()).isEmpty();
   }
 
   private static class EmptyIterable<T> implements Iterable<T> {

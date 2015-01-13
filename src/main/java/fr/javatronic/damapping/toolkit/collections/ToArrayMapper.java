@@ -20,12 +20,12 @@ import fr.javatronic.damapping.toolkit.MappingDefaults;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import com.google.common.collect.Lists;
 
 import static fr.javatronic.damapping.toolkit.MappingDefaults.defaultTo;
+import static java.util.Objects.requireNonNull;
 
 /**
  * ToArrayMapper - This class provides the developer with a convenient way to map Collection, Iterable, etc.
@@ -37,6 +37,7 @@ import static fr.javatronic.damapping.toolkit.MappingDefaults.defaultTo;
  */
 public abstract class ToArrayMapper {
   private static final MappingDefaults<?> EMPTY_ARRAY_DEFAULTS = defaultTo(new Object[0]);
+  private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
   /**
    * Transforms a collection into an array, returns an empty array when the specified collection is {@code null} or
@@ -72,6 +73,29 @@ public abstract class ToArrayMapper {
   @Nonnull
   public static <T> T[] toArray(@Nullable Iterable<T> iterable) {
     return toArray(iterable, ToArrayMapper.<T>defaultToEmpty());
+  }
+
+  /**
+   * Transforms a String into a array of String containing the specified String as single value.
+   * <p>
+   * This method returns an empty array if the String is {@code null} or empty.
+   * </p>
+   *
+   * @param str a {@link String} or {@code null}
+   *
+   * @return a array of {@link String}
+   */
+  @Nonnull
+  public static String[] toArray(@Nullable String str) {
+    return toArray(str, MappingDefaults.defaultTo(EMPTY_STRING_ARRAY));
+  }
+
+  /**
+   * Private method isolating SuppressWarnings annotation to the smallest piece of code possible.
+   */
+  @SuppressWarnings("unchecked")
+  private static <T> T[] toArrayImpl(T object) {
+    return (T[]) new Object[]{object};
   }
 
   /**
@@ -123,6 +147,22 @@ public abstract class ToArrayMapper {
   }
 
   /**
+   * Transforms a String into a array of String containing the specified String as single value.
+   * <p>
+   * This method returns the specified defaultValue if the String is {@code null} or empty.
+   * </p>
+   *
+   * @param str          a {@link String} or {@code null}
+   * @param defaultValue a array if {@link String} or {@code null}
+   *
+   * @return a array of {@link String} or {@code null}
+   */
+  @Nullable
+  public static String[] toArray(@Nullable String str, @Nullable String[] defaultValue) {
+    return toArray(str, defaultTo(defaultValue));
+  }
+
+  /**
    * Transforms a collection into an array, returns the default returned by the specified defaultValue methods
    * {@link MappingDefaults#whenNull()} and {@link MappingDefaults#whenEmpty()} when the collection
    * is {@code null} or empty.
@@ -150,7 +190,7 @@ public abstract class ToArrayMapper {
   @Nullable
   public static <T> T[] toArray(@Nullable Collection<T> collection,
                                 @Nonnull MappingDefaults<T[]> defaultValue) {
-    Objects.requireNonNull(defaultValue);
+    requireNonNull(defaultValue);
     if (collection == null) {
       return defaultValue.whenNull();
     }
@@ -182,7 +222,7 @@ public abstract class ToArrayMapper {
   @Nullable
   public static <T> T[] toArray(@Nullable Iterable<T> iterable,
                                 @Nonnull MappingDefaults<T[]> defaultValue) {
-    Objects.requireNonNull(defaultValue);
+    requireNonNull(defaultValue);
     if (iterable == null) {
       return defaultValue.whenNull();
     }
@@ -209,6 +249,35 @@ public abstract class ToArrayMapper {
   private static <T> T[] toArrayImpl(Collection<T> collection) {
     return collection.toArray((T[]) new Object[collection.size()]);
   }
+
+
+  /**
+   * Transforms a String into a array of String containing the specified String as single value.
+   * <p>
+   * This method returns the result of method {@link MappingDefaults#whenNull()} when the specified String is {@code
+   * null} and the result of  {@link MappingDefaults#whenEmpty()} when the String is empty.
+   * </p>
+   *
+   * @param str          a {@link String} or {@code null}
+   * @param defaultValue a {@link MappingDefaults}
+   *
+   * @return a array of {@link String} or {@code null}
+   *
+   * @throws java.lang.NullPointerException if defaultValue is {@code null}
+   */
+  @Nullable
+  public static String[] toArray(@Nullable String str, @Nonnull MappingDefaults<String[]> defaultValue) {
+    requireNonNull(defaultValue);
+    if (str == null) {
+      return defaultValue.whenNull();
+    }
+    if (str.isEmpty()) {
+      return defaultValue.whenEmpty();
+    }
+
+    return new String[]{str};
+  }
+
 
   /**
    * Creates a MappingDefaults that returns a {@code null} array of type {@code T} in every case.
