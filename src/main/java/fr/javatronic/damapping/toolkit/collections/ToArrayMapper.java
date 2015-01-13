@@ -18,9 +18,12 @@ package fr.javatronic.damapping.toolkit.collections;
 import fr.javatronic.damapping.toolkit.MappingDefaults;
 
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import com.google.common.collect.Lists;
 
 import static fr.javatronic.damapping.toolkit.MappingDefaults.defaultTo;
 
@@ -43,18 +46,32 @@ public abstract class ToArrayMapper {
    * the returned array will respect the same order.
    * </p>
    *
-   * @param collection a collection of type {@code T} or {@code null}
+   * @param collection a {@link Collection} of type {@code T} or {@code null}
    * @param <T>        a type
    *
    * @return a array of type {@code T}
    */
   @Nonnull
   public static <T> T[] toArray(@Nullable Collection<T> collection) {
-    if (collection == null || collection.isEmpty()) {
-      return emptyArray();
-    }
+    return toArray(collection, ToArrayMapper.<T>emptyArray());
+  }
 
-    return toArrayImpl(collection);
+  /**
+   * Transforms a Iterable into an array, returns an empty array when the iterable is {@code null}, has a code null}
+   * Iterator or is empty.
+   * <p>
+   * If the Iterable makes any guarantees as to what order its elements are returned by its iterator, the elements in
+   * the returned array will respect the same order.
+   * </p>
+   *
+   * @param iterable a {@link Iterable} of type {@code T} or {@code null}
+   * @param <T>      a type
+   *
+   * @return a array of type {@code T}
+   */
+  @Nonnull
+  public static <T> T[] toArray(@Nullable Iterable<T> iterable) {
+    return toArray(iterable, ToArrayMapper.<T>defaultToEmpty());
   }
 
   /**
@@ -73,7 +90,7 @@ public abstract class ToArrayMapper {
    * the returned array will respect the same order.
    * </p>
    *
-   * @param collection   a collection of type {@code T} or {@code null}
+   * @param collection   a {@link Collection} of type {@code T} or {@code null}
    * @param defaultValue a array of {@code T} or {@code null}
    * @param <T>          a type
    *
@@ -84,6 +101,25 @@ public abstract class ToArrayMapper {
   @Nullable
   public static <T> T[] toArray(@Nullable Collection<T> collection, @Nullable T[] defaultValue) {
     return toArray(collection, defaultTo(defaultValue));
+  }
+
+  /**
+   * Transforms a Iterable into an array, returns the specified defaultValue when the iterable is {@code null}, has a
+   * {@code null} Iterator or is empty.
+   * <p>
+   * If the Iterable makes any guarantees as to what order its elements are returned by its iterator, the elements in
+   * the returned array will respect the same order.
+   * </p>
+   *
+   * @param iterable     a {@link Iterable} of type {@code T} or {@code null}
+   * @param defaultValue a array of {@code T} or {@code null}
+   * @param <T>          a type
+   *
+   * @return a array of type {@code T} or {@code null}
+   */
+  @Nullable
+  public static <T> T[] toArray(@Nullable Iterable<T> iterable, @Nullable T[] defaultValue) {
+    return toArray(iterable, defaultTo(defaultValue));
   }
 
   /**
@@ -101,7 +137,7 @@ public abstract class ToArrayMapper {
    * or return a {@code null} value when collection is {@code null} or empty.
    * </p>
    *
-   * @param collection   a collection of type {@code T} or {@code null}
+   * @param collection   a {@link Collection} of type {@code T} or {@code null}
    * @param defaultValue a {@link MappingDefaults} of type {@code T[]}
    * @param <T>          a type
    *
@@ -124,6 +160,46 @@ public abstract class ToArrayMapper {
     }
 
     return toArrayImpl(collection);
+  }
+
+  /**
+   * Transforms a Iterable into an array, returns the default returned by the method
+   * {@link MappingDefaults#whenNull()} of the specified defaultValue when the iterable is {@code null} or returns a
+   * {@code null} Iterator and the one of {@link MappingDefaults#whenEmpty()} when the Iterable is empty.
+   * <p>
+   * If the Iterable makes any guarantees as to what order its elements are returned by its iterator, the elements in
+   * the returned array will respect the same order.
+   * </p>
+   *
+   * @param iterable     a {@link Iterable} of type {@code T} or {@code null}
+   * @param defaultValue a array of {@code T} or {@code null}
+   * @param <T>          a type
+   *
+   * @return a array of type {@code T} or {@code null}
+   *
+   * @throws NullPointerException if the {@code defaultValue} is {@code null}
+   */
+  @Nullable
+  public static <T> T[] toArray(@Nullable Iterable<T> iterable,
+                                @Nonnull MappingDefaults<T[]> defaultValue) {
+    Objects.requireNonNull(defaultValue);
+    if (iterable == null) {
+      return defaultValue.whenNull();
+    }
+    Iterator<T> iterator = iterable.iterator();
+    if (iterator == null) {
+      return defaultValue.whenNull();
+    }
+    if (!iterator.hasNext()) {
+      return defaultValue.whenEmpty();
+    }
+
+    List<T> list = Lists.newArrayList();
+    while (iterator.hasNext()) {
+      list.add(iterator.next());
+    }
+
+    return toArrayImpl(list);
   }
 
   /**
