@@ -15,10 +15,16 @@
  */
 package fr.javatronic.damapping.toolkit.enums;
 
+import fr.javatronic.damapping.toolkit.BiMapping;
 import fr.javatronic.damapping.toolkit.MappingDefaults;
 
+import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableMap;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.util.Objects.requireNonNull;
@@ -55,7 +61,7 @@ import static java.util.Objects.requireNonNull;
  * </pre>
  * </p>
  * <p>
- * Most common enum mappings are based on the name, sometimes on the value of toString(). These mappings have prime
+ * Most enum mappings are based on the name, sometimes on the value of toString(). These mappings have prime
  * support:
  * <pre>
  * assert StringEnumMapper.map(Bar.class).byName().toEnum("ACME") == Bar.ACME;
@@ -94,7 +100,6 @@ import static java.util.Objects.requireNonNull;
  * @author Sébastien Lesaint
  */
 /*
- * TODO use internal Map for case sensitive matching instead of loop to improve performance?
  * TODO add shorthand for case-sensitive matching on name with optional such as Guava's <T extends Enum<T>>
  * Optional<T> getIfPresent(Class<T>, String)
  * TODO Java8 support: make EnumToString a Functional interface, add methods returning optional instead of null? quid
@@ -158,31 +163,13 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<T> byName() {
-      return new StringEnumMapperImpl<T>(
-          enumAClass,
-          new EnumToString<T>() {
-            @Nonnull
-            @Override
-            public String transform(@Nonnull T enumValue) {
-              return enumValue.name();
-            }
-          }
-      );
+      return new NameStringEnumMapper<T>(enumAClass, StringEnumMapperDefaults.<T>defaultsToNull());
     }
 
     @Nonnull
     @Override
     public StringEnumMapper<T> byToString() {
-      return new StringEnumMapperImpl<T>(
-          enumAClass,
-          new EnumToString<T>() {
-            @Nonnull
-            @Override
-            public String transform(@Nonnull T enumValue) {
-              return enumValue.toString();
-            }
-          }
-      );
+      return new ToStringStringEnumMapper<T>(enumAClass, StringEnumMapperDefaults.<T>defaultsToNull());
     }
   }
 
@@ -195,6 +182,7 @@ public final class StringEnumMappers {
         "the value can not be null";
     private static final String NUll_MAPPING_DEFAULTS_ERROR_MSG = "provided " + MappingDefaults.class.getSimpleName()
         + " object can not be null";
+    private static final String EXCEPTIONS_ARE_NOT_YET_IMPLEMENTED = "Exceptions are not yet implemented";
 
     @Nonnull
     private final Class<E> clazz;
@@ -206,8 +194,7 @@ public final class StringEnumMappers {
     private final MappingDefaults<E> enumDefaults;
     private final boolean ignoreCase;
 
-    private StringEnumMapperImpl(@Nonnull Class<E> clazz,
-                                 @Nonnull EnumToString<E> transformer) {
+    private StringEnumMapperImpl(@Nonnull Class<E> clazz, @Nonnull EnumToString<E> transformer) {
       this(clazz, transformer, null, null, false);
     }
 
@@ -223,20 +210,9 @@ public final class StringEnumMappers {
       this.ignoreCase = ignoreCase;
     }
 
-    /**
-     * Returns a mapper that will map an enum to and from a String the same way as the current mapper but will use a
-     * String comparison that ignores case.
-     *
-     * @return the current StringEnumMapper if String comparison is already case insensitive, otherwise a new one
-     */
-    @Nonnull
-    public StringEnumMapper<E> ignoreCase() {
-      if (ignoreCase) {
-        return this;
-      }
-      return new StringEnumMapperImpl<E>(clazz, transformer, stringDefaults, enumDefaults, true);
-    }
-
+    /*=================*
+     * Mapping methods *
+     *=================*/
     @Nullable
     @Override
     public String toString(@Nullable E enumValue) {
@@ -273,6 +249,49 @@ public final class StringEnumMappers {
       return transform.compareTo(str);
     }
 
+    /*=============*
+     * case switch *
+     *=============*/
+
+    /**
+     * Returns a mapper that will map an enum to and from a String the same way as the current mapper but will use a
+     * String comparison that ignores case.
+     *
+     * @return the current StringEnumMapper if String comparison is already case insensitive, otherwise a new one
+     */
+    @Nonnull
+    public StringEnumMapper<E> ignoreCase() {
+      if (ignoreCase) {
+        return this;
+      }
+      return new StringEnumMapperImpl<E>(clazz, transformer, stringDefaults, enumDefaults, true);
+    }
+
+    /*====================*
+     * Mapping exceptions *
+     *====================*/
+
+    @Nonnull
+    @Override
+    public StringEnumMapper<E> except(@Nonnull E enumValue, @Nullable String str) {
+      throw new UnsupportedOperationException(EXCEPTIONS_ARE_NOT_YET_IMPLEMENTED);
+    }
+
+    @Nonnull
+    @Override
+    public StringEnumMapper<E> except(@Nonnull String str, @Nullable E e) {
+      throw new UnsupportedOperationException(EXCEPTIONS_ARE_NOT_YET_IMPLEMENTED);
+    }
+
+    @Nonnull
+    @Override
+    public StringEnumMapper<E> except(@Nonnull BiMapping<E, String> exceptionMapping) {
+      throw new UnsupportedOperationException(EXCEPTIONS_ARE_NOT_YET_IMPLEMENTED);
+    }
+
+    /*==========*
+         * defaults *
+         *==========*/
     @Nonnull
     @Override
     public StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
@@ -343,6 +362,798 @@ public final class StringEnumMappers {
           this.enumDefaults.withUnknownDefault(unknownDefaultValue),
           ignoreCase
       );
+    }
+  }
+
+  private static final String EXCEPTIONS_ARE_NOT_YET_IMPLEMENTED = "Exceptions are not yet implemented";
+
+  /**
+   * This class holds the defaults for a StringEnumMapper implementation as two MappingDefaults objects and implements
+   * the StringEnumMapper methods to update defaults.
+   *
+   * @param <E> any enum type
+   */
+  @Immutable
+  private static class StringEnumMapperDefaults<E> {
+    private static final String NUll_MAPPING_DEFAULTS_ERROR_MSG = "provided " + MappingDefaults.class.getSimpleName()
+        + " object can not be null";
+    private static final String NUll_DEFAULT_VALUE_ERROR_MSG = "When specifying a default value, " +
+        "the value can not be null";
+
+    @Nonnull
+    private final MappingDefaults<String> stringDefaults;
+    @Nonnull
+    private final MappingDefaults<E> enumDefaults;
+
+    public StringEnumMapperDefaults(@Nonnull MappingDefaults<String> defaults,
+                                    @Nonnull MappingDefaults<E> enumDefaults) {
+      this.stringDefaults = requireNonNull(defaults);
+      this.enumDefaults = requireNonNull(enumDefaults);
+    }
+
+    @Nonnull
+    public MappingDefaults<String> getStringDefaults() {
+      return stringDefaults;
+    }
+
+    @Nonnull
+    public MappingDefaults<E> getEnumDefaults() {
+      return enumDefaults;
+    }
+
+    /**
+     * Returns a StringEnumMapperDefaults with the same enum defaults as the current mapper by the specified String
+     * default.
+     *
+     * @param defaultValue a {@link MappingDefaults}
+     *
+     * @return a {@link StringEnumMapper}
+     */
+    @Nonnull
+    public StringEnumMapperDefaults<E> withDefault(@Nonnull String defaultValue) {
+      requireNonNull(defaultValue, NUll_DEFAULT_VALUE_ERROR_MSG);
+      return new StringEnumMapperDefaults<E>(
+          MappingDefaults.defaultTo(defaultValue),
+          this.enumDefaults
+      );
+    }
+
+    /**
+     * Returns a StringEnumMapperDefaults with the same String defaults as the current mapper but the specified enum
+     * defaults.
+     *
+     * @param defaults a {@link MappingDefaults}
+     *
+     * @return a {@link StringEnumMapper}
+     */
+    @Nonnull
+    public StringEnumMapperDefaults<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
+      requireNonNull(defaults, NUll_MAPPING_DEFAULTS_ERROR_MSG);
+      return new StringEnumMapperDefaults<E>(this.stringDefaults, defaults);
+    }
+
+    /**
+     * Returns a StringEnumMapperDefaults with the same String defaults as the current mapper but will use the
+     * specified value for all enum defaults.
+     *
+     * @param defaultValueForAll an enum value
+     *
+     * @return a {@link StringEnumMapper}
+     */
+    @Nonnull
+    public StringEnumMapperDefaults<E> withDefault(@Nonnull E defaultValueForAll) {
+      requireNonNull(defaultValueForAll, NUll_DEFAULT_VALUE_ERROR_MSG);
+      return new StringEnumMapperDefaults<E>(
+          this.stringDefaults,
+          MappingDefaults.defaultTo(defaultValueForAll)
+      );
+    }
+
+    /**
+     * Returns a StringEnumMapperDefaults with the same String defaults and the same enum defaults as the current mapper
+     * but will use the specified value when the input String is {@code null}.
+     *
+     * @param nullDefaultValue an enum value
+     *
+     * @return a {@link StringEnumMapper}
+     */
+    @Nonnull
+    public StringEnumMapperDefaults<E> withNullDefault(@Nonnull E nullDefaultValue) {
+      requireNonNull(nullDefaultValue, NUll_DEFAULT_VALUE_ERROR_MSG);
+      return new StringEnumMapperDefaults<E>(
+          this.stringDefaults,
+          this.enumDefaults.withNullDefault(nullDefaultValue)
+      );
+    }
+
+    /**
+     * Returns a StringEnumMapperDefaults with the same String defaults and the same enum defaults as the current mapper
+     * but will use the specified value when the input String is empty.
+     *
+     * @param emptyDefaultValue an enum value
+     *
+     * @return a {@link StringEnumMapper}
+     */
+    @Nonnull
+    public StringEnumMapperDefaults<E> withEmptyDefault(@Nonnull E emptyDefaultValue) {
+      requireNonNull(emptyDefaultValue, NUll_DEFAULT_VALUE_ERROR_MSG);
+      return new StringEnumMapperDefaults<E>(
+          this.stringDefaults,
+          this.enumDefaults.withEmptyDefault(emptyDefaultValue)
+      );
+    }
+
+    /**
+     * Returns a StringEnumMapperDefaults with the same String defaults and the same enum defaults as the current mapper
+     * but will use the specified value when the input String is unknown.
+     *
+     * @param unknownDefaultValue an enum value
+     *
+     * @return a {@link StringEnumMapper}
+     */
+    @Nonnull
+    public StringEnumMapperDefaults<E> withUnknownDefault(@Nonnull E unknownDefaultValue) {
+      requireNonNull(unknownDefaultValue, NUll_DEFAULT_VALUE_ERROR_MSG);
+      return new StringEnumMapperDefaults<E>(
+          this.stringDefaults,
+          this.enumDefaults.withUnknownDefault(unknownDefaultValue)
+      );
+    }
+
+    /**
+     * Creates a StringEnumMapperDefaults with {@code null} as String and enum defaults.
+     *
+     * @param <T> any enum type
+     *
+     * @return a {@link StringEnumMapper}
+     */
+    public static <T extends Enum<T>> StringEnumMapperDefaults<T> defaultsToNull() {
+      return new StringEnumMapperDefaults<T>(
+          MappingDefaults.<String>defaultToNull(),
+          MappingDefaults.<T>defaultToNull()
+      );
+    }
+  }
+
+  private static abstract class AbstractStringEnumMapper<T extends Enum<T>>
+      implements StringEnumMapper<T> {
+    @Nonnull
+    protected final Class<T> clazz;
+    @Nonnull
+    protected final StringEnumMapperDefaults<T> defaults;
+
+    protected AbstractStringEnumMapper(@Nonnull Class<T> clazz, @Nonnull StringEnumMapperDefaults<T> defaults) {
+      this.clazz = requireNonNull(clazz);
+      this.defaults = requireNonNull(defaults);
+    }
+  }
+
+  /**
+   * Abstract implementation of StringEnumMapper that implements holds mapping from an enum to a String and from a
+   * String to an enum as a two immutable maps.
+   * <p>
+   * This abstract class populates these maps using the Function returned by the abstract method {@link
+   * #getEnumToStringTransformer()} assuming the mapping is bijective.
+   * </p>
+   * <p>
+   * This class also provide an implementation for the method {@link StringEnumMapper#toString(Enum)} as it is the
+   * same for both case sensitive and case insensitive mappers but leaves the implementation of method
+   * {@link StringEnumMapper#toEnum(String)} to subclasses.
+   * </p>
+   *
+   * @param <E> any enum type
+   */
+  private static abstract class AbstractMapStringEnumMapper<E extends Enum<E>>
+      extends AbstractStringEnumMapper<E>
+      implements StringEnumMapper<E> {
+
+    @Nonnull
+    protected final ImmutableMap<E, String> enumToString;
+    @Nonnull
+    protected final ImmutableMap<String, E> stringToEnum;
+
+    protected AbstractMapStringEnumMapper(@Nonnull Class<E> clazz,
+                                          @Nonnull ImmutableMap<E, String> enumToString,
+                                          @Nonnull ImmutableMap<String, E> stringToEnum,
+                                          @Nonnull StringEnumMapperDefaults<E> defaults) {
+      super(clazz, defaults);
+      this.enumToString = requireNonNull(enumToString);
+      this.stringToEnum = requireNonNull(stringToEnum);
+    }
+
+    protected AbstractMapStringEnumMapper(@Nonnull Class<E> clazz,
+                                          @Nonnull StringEnumMapperDefaults<E> defaults) {
+      super(clazz, defaults);
+
+      Function<E, String> transformer = getEnumToStringTransformer();
+      ImmutableBiMap.Builder<E, String> enumStrBuilder = ImmutableBiMap.builder();
+      ImmutableBiMap.Builder<String, E> strEnumBuilder = ImmutableBiMap.builder();
+      for (E enumConstant : clazz.getEnumConstants()) {
+        String str = requireNonNull(
+            transformer.apply(enumConstant),
+            "String representation of value " + enumConstant + " can not be null"
+        );
+        enumStrBuilder.put(enumConstant, str);
+        strEnumBuilder.put(str, enumConstant);
+      }
+      this.enumToString = enumStrBuilder.build();
+      this.stringToEnum = strEnumBuilder.build();
+    }
+
+    @Nonnull
+    protected abstract Function<E, String> getEnumToStringTransformer();
+
+    /*=================*
+     * Mapping methods *
+     *=================*/
+
+    @Override
+    @Nullable
+    public String toString(@Nullable E enumValue) {
+      if (enumValue == null) {
+        return defaults.getStringDefaults().whenNull();
+      }
+
+      return enumToString.get(enumValue);
+    }
+
+    /*====================*
+     * Mapping exceptions *
+     *====================*/
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> except(@Nonnull E enumValue, @Nullable String str) {
+      throw new UnsupportedOperationException(EXCEPTIONS_ARE_NOT_YET_IMPLEMENTED);
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> except(@Nonnull String str, @Nullable E e) {
+      throw new UnsupportedOperationException(EXCEPTIONS_ARE_NOT_YET_IMPLEMENTED);
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> except(@Nonnull BiMapping<E, String> exceptionMapping) {
+      throw new UnsupportedOperationException(EXCEPTIONS_ARE_NOT_YET_IMPLEMENTED);
+    }
+  }
+
+  /**
+   * Abstract class that extends AbstractMapStringEnumMapper by implementing a case sensitive
+   * {@link StringEnumMapper#toEnum(String)} method.
+   *
+   * @param <E> any enum type
+   */
+  private static abstract class CaseSensitiveMapStringEnumMapper<E extends Enum<E>>
+      extends AbstractMapStringEnumMapper<E>
+      implements StringEnumMapper<E> {
+
+    protected CaseSensitiveMapStringEnumMapper(@Nonnull Class<E> clazz,
+                                               @Nonnull ImmutableMap<E, String> enumToString,
+                                               @Nonnull ImmutableMap<String, E> stringToEnum,
+                                               @Nonnull StringEnumMapperDefaults<E> defaults) {
+      super(clazz, enumToString, stringToEnum, defaults);
+    }
+
+    protected CaseSensitiveMapStringEnumMapper(@Nonnull Class<E> clazz,
+                                               @Nonnull StringEnumMapperDefaults<E> defaults) {
+      super(clazz, defaults);
+    }
+
+    /*=================*
+     * Mapping methods *
+     *=================*/
+    @Override
+    @Nullable
+    public E toEnum(@Nullable String str) {
+      if (str == null) {
+        return defaults.getEnumDefaults().whenNull();
+      }
+
+      if (str.isEmpty()) {
+        return defaults.getEnumDefaults().whenEmpty();
+      }
+
+      E res = stringToEnum.get(str);
+      if (res == null) {
+        return defaults.getEnumDefaults().whenUnknown();
+      }
+      return res;
+    }
+  }
+
+  /**
+   * Abstract class that extends AbstractMapStringEnumMapper by implementing a case insensitive
+   * {@link StringEnumMapper#toEnum(String)} method.
+   *
+   * @param <E> any enum type
+   */
+  private static abstract class CaseInsensitiveMapStringEnumMapper<E extends Enum<E>>
+      extends AbstractMapStringEnumMapper<E>
+      implements StringEnumMapper<E> {
+
+    protected CaseInsensitiveMapStringEnumMapper(@Nonnull Class<E> clazz,
+                                                 @Nonnull ImmutableMap<E, String> enumToString,
+                                                 @Nonnull ImmutableMap<String, E> stringToEnum,
+                                                 @Nonnull StringEnumMapperDefaults<E> defaults) {
+      super(clazz, enumToString, stringToEnum, defaults);
+    }
+
+    protected CaseInsensitiveMapStringEnumMapper(@Nonnull Class<E> clazz,
+                                                 @Nonnull StringEnumMapperDefaults<E> defaults) {
+      super(clazz, defaults);
+    }
+
+    /*=================*
+     * Mapping methods *
+     *=================*/
+    @Override
+    @Nullable
+    public E toEnum(@Nullable String str) {
+      if (str == null) {
+        return defaults.getEnumDefaults().whenNull();
+      }
+
+      if (str.isEmpty()) {
+        return defaults.getEnumDefaults().whenEmpty();
+      }
+
+      for (Map.Entry<String, E> entry : stringToEnum.entrySet()) {
+        if (entry.getKey().compareToIgnoreCase(str) == 0) {
+          return entry.getValue();
+        }
+      }
+      return defaults.getEnumDefaults().whenUnknown();
+    }
+  }
+
+  /**
+   * Implementation of a StringEnumMapper that matches String to and from enum values using the enum's name method,
+   * uses a case insensitive comparison to compare an input String to name() result and is backed by Maps.
+   *
+   * @param <E> any enum type
+   */
+  private static class NameInsensitiveStringEnumMapper<E extends Enum<E>>
+      extends CaseInsensitiveMapStringEnumMapper<E>
+      implements StringEnumMapper<E> {
+
+    protected NameInsensitiveStringEnumMapper(@Nonnull Class<E> clazz,
+                                              @Nonnull ImmutableMap<E, String> enumToString,
+                                              @Nonnull ImmutableMap<String, E> stringToEnum,
+                                              @Nonnull StringEnumMapperDefaults<E> defaults) {
+      super(clazz, enumToString, stringToEnum, defaults);
+    }
+
+    @Override
+    @Nonnull
+    protected Function<E, String> getEnumToStringTransformer() {
+      return new EnumNameFunction<E>();
+    }
+
+    /*=============*
+     * case switch *
+     *=============*/
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> ignoreCase() {
+      return this;
+    }
+
+    /*==========*
+     * defaults *
+     *==========*/
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
+      return new NameInsensitiveStringEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withEnumDefaults(defaults)
+      );
+    }
+
+    @Nonnull
+    @Override
+    public StringEnumMapper<E> withDefault(@Nonnull String defaultValue) {
+      return new NameInsensitiveStringEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withDefault(defaultValue)
+      );
+    }
+
+    @Nonnull
+    @Override
+    public StringEnumMapper<E> withDefault(@Nonnull E defaultValueForAll) {
+      return new NameInsensitiveStringEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withDefault(defaultValueForAll)
+      );
+    }
+
+    @Nonnull
+    @Override
+    public StringEnumMapper<E> withNullDefault(@Nonnull E nullDefaultValue) {
+      return new NameInsensitiveStringEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withNullDefault(nullDefaultValue)
+      );
+    }
+
+    @Nonnull
+    @Override
+    public StringEnumMapper<E> withEmptyDefault(@Nonnull E emptyDefaultValue) {
+      return new NameInsensitiveStringEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withEmptyDefault(emptyDefaultValue)
+      );
+    }
+
+    @Nonnull
+    @Override
+    public StringEnumMapper<E> withUnknownDefault(@Nonnull E unknownDefaultValue) {
+      return new NameInsensitiveStringEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withUnknownDefault(unknownDefaultValue)
+      );
+    }
+  }
+
+  /**
+   * Implementation of a StringEnumMapper that matches String to and from enum values using the enum's name method,
+   * uses a case sensitive comparison to compare an input String to name() result and is backed by Maps.
+   *
+   * @param <E> any enum type
+   */
+  private static class NameStringEnumMapper<E extends Enum<E>>
+      extends CaseSensitiveMapStringEnumMapper<E>
+      implements StringEnumMapper<E> {
+
+    public NameStringEnumMapper(@Nonnull Class<E> clazz, @Nonnull StringEnumMapperDefaults<E> defaults) {
+      super(clazz, defaults);
+    }
+
+    private NameStringEnumMapper(@Nonnull Class<E> clazz,
+                                 @Nonnull ImmutableMap<E, String> enumToString,
+                                 @Nonnull ImmutableMap<String, E> stringToEnum,
+                                 @Nonnull StringEnumMapperDefaults<E> defaults) {
+      super(clazz, enumToString, stringToEnum, defaults);
+    }
+
+    @Override
+    @Nonnull
+    protected Function<E, String> getEnumToStringTransformer() {
+      return new EnumNameFunction<E>();
+    }
+
+    /*=============*
+     * case switch *
+     *=============*/
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> ignoreCase() {
+      return new NameInsensitiveStringEnumMapper<>(clazz, enumToString, stringToEnum, defaults);
+    }
+
+    /*==========*
+     * defaults *
+     *==========*/
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
+      return new NameStringEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withEnumDefaults(defaults)
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withDefault(@Nonnull String defaultValue) {
+      return new NameStringEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withDefault(defaultValue)
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withDefault(@Nonnull E defaultValueForAll) {
+      return new NameStringEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withDefault(defaultValueForAll)
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withNullDefault(@Nonnull E nullDefaultValue) {
+      return new NameStringEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withNullDefault(nullDefaultValue)
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withEmptyDefault(@Nonnull E emptyDefaultValue) {
+      return new NameStringEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withEmptyDefault(emptyDefaultValue)
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withUnknownDefault(@Nonnull E unknownDefaultValue) {
+      return new NameStringEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withUnknownDefault(unknownDefaultValue)
+      );
+    }
+  }
+
+  /**
+   * Implementation of a StringEnumMapper that matches String to and from enum values using the enum's toString method,
+   * uses a case insensitive comparison to compare an input String to toString() result and is backed by Maps.
+   *
+   * @param <E> any enum type
+   */
+  private static class ToStringInsensitiveEnumMapper<E extends Enum<E>>
+      extends CaseInsensitiveMapStringEnumMapper<E>
+      implements StringEnumMapper<E> {
+
+    protected ToStringInsensitiveEnumMapper(@Nonnull Class<E> clazz,
+                                            @Nonnull ImmutableMap<E, String> enumToString,
+                                            @Nonnull ImmutableMap<String, E> stringToEnum,
+                                            @Nonnull StringEnumMapperDefaults<E> defaults) {
+      super(clazz, enumToString, stringToEnum, defaults);
+    }
+
+    @Override
+    @Nonnull
+    protected Function<E, String> getEnumToStringTransformer() {
+      return new EnumToStringFunction<>();
+    }
+
+    /*=============*
+     * case switch *
+     *=============*/
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> ignoreCase() {
+      return this;
+    }
+
+    /*==========*
+     * defaults *
+     *==========*/
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
+      return new ToStringInsensitiveEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withEnumDefaults(defaults)
+      );
+    }
+
+    @Nonnull
+    @Override
+    public StringEnumMapper<E> withDefault(@Nonnull String defaultValue) {
+      return new ToStringInsensitiveEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withDefault(defaultValue)
+      );
+    }
+
+    @Nonnull
+    @Override
+    public StringEnumMapper<E> withDefault(@Nonnull E defaultValueForAll) {
+      return new ToStringInsensitiveEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withDefault(defaultValueForAll)
+      );
+    }
+
+    @Nonnull
+    @Override
+    public StringEnumMapper<E> withNullDefault(@Nonnull E nullDefaultValue) {
+      return new ToStringInsensitiveEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withNullDefault(nullDefaultValue)
+      );
+    }
+
+    @Nonnull
+    @Override
+    public StringEnumMapper<E> withEmptyDefault(@Nonnull E emptyDefaultValue) {
+      return new ToStringInsensitiveEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withEmptyDefault(emptyDefaultValue)
+      );
+    }
+
+    @Nonnull
+    @Override
+    public StringEnumMapper<E> withUnknownDefault(@Nonnull E unknownDefaultValue) {
+      return new ToStringInsensitiveEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withUnknownDefault(unknownDefaultValue)
+      );
+    }
+  }
+
+  /**
+   * Implementation of a StringEnumMapper that matches String to and from enum values using the enum's toString method,
+   * uses a case sensitive comparison to compare an input String to toString() result and is backed by Maps.
+   *
+   * @param <E> any enum type
+   */
+  private static class ToStringStringEnumMapper<E extends Enum<E>>
+      extends CaseSensitiveMapStringEnumMapper<E>
+      implements StringEnumMapper<E> {
+
+    public ToStringStringEnumMapper(@Nonnull Class<E> clazz, @Nonnull StringEnumMapperDefaults<E> defaults) {
+      super(clazz, defaults);
+    }
+
+    private ToStringStringEnumMapper(@Nonnull Class<E> clazz,
+                                     @Nonnull ImmutableMap<E, String> enumToString,
+                                     @Nonnull ImmutableMap<String, E> stringToEnum,
+                                     @Nonnull StringEnumMapperDefaults<E> defaults) {
+      super(clazz, enumToString, stringToEnum, defaults);
+    }
+
+    @Override
+    @Nonnull
+    protected Function<E, String> getEnumToStringTransformer() {
+      return new EnumToStringFunction<>();
+    }
+
+    /*=============*
+     * case switch *
+     *=============*/
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> ignoreCase() {
+      return new ToStringInsensitiveEnumMapper<>(clazz, enumToString, stringToEnum, defaults);
+    }
+
+    /*==========*
+     * defaults *
+     *==========*/
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
+      return new ToStringStringEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withEnumDefaults(defaults)
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withDefault(@Nonnull String defaultValue) {
+      return new ToStringStringEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withDefault(defaultValue)
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withDefault(@Nonnull E defaultValueForAll) {
+      return new ToStringStringEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withDefault(defaultValueForAll)
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withNullDefault(@Nonnull E nullDefaultValue) {
+      return new ToStringStringEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withNullDefault(nullDefaultValue)
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withEmptyDefault(@Nonnull E emptyDefaultValue) {
+      return new ToStringStringEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withEmptyDefault(emptyDefaultValue)
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withUnknownDefault(@Nonnull E unknownDefaultValue) {
+      return new ToStringStringEnumMapper<E>(
+          clazz,
+          this.enumToString,
+          this.stringToEnum,
+          this.defaults.withUnknownDefault(unknownDefaultValue)
+      );
+    }
+  }
+
+  /**
+   * Function that transforms an enum value into the String returned by its name method.
+   *
+   * @param <E> any enum type
+   */
+  private static class EnumNameFunction<E extends Enum<E>> implements Function<E, String> {
+    @Override
+    @Nullable
+    public String apply(@Nullable E input) {
+      if (input == null) {
+        return null;
+      }
+      return input.name();
+    }
+  }
+
+  /**
+   * Function that transforms an enum value into the String returned by its toString method.
+   *
+   * @param <E> any enum type
+   */
+  private static class EnumToStringFunction<E extends Enum<E>> implements Function<E, String> {
+    @Override
+    @Nullable
+    public String apply(@Nullable E input) {
+      if (input == null) {
+        return null;
+      }
+      return input.toString();
     }
   }
 }
