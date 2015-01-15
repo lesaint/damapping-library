@@ -43,7 +43,7 @@ public class StringEnumMappers_Custom_Test {
     StringEnumMapper<EnumA> mapper = map(EnumA.class).by(WeirdEnumATransformer.INSTANCE);
 
     for (EnumA enumA : EnumA.values()) {
-      assertThat(mapper.toString(enumA)).isEqualTo(WeirdEnumATransformer.INSTANCE.transform(enumA));
+      assertThat(mapper.toString(enumA)).isEqualTo(WeirdEnumATransformer.INSTANCE.apply(enumA));
     }
   }
 
@@ -57,7 +57,7 @@ public class StringEnumMappers_Custom_Test {
     StringEnumMapper<EnumA> mapper = map(EnumA.class).by(WeirdEnumATransformer.INSTANCE);
 
     for (EnumA enumA : EnumA.values()) {
-      assertThat(mapper.toEnum(WeirdEnumATransformer.INSTANCE.transform(enumA))).isEqualTo(enumA);
+      assertThat(mapper.toEnum(WeirdEnumATransformer.INSTANCE.apply(enumA))).isEqualTo(enumA);
     }
   }
 
@@ -76,7 +76,7 @@ public class StringEnumMappers_Custom_Test {
     StringEnumMapper<EnumA> mapper = map(EnumA.class).by(WeirdEnumATransformer.INSTANCE);
 
     for (EnumA enumA : EnumA.values()) {
-      assertThat(mapper.toEnum(WeirdEnumATransformer.INSTANCE.transform(enumA).toUpperCase())).isNull();
+      assertThat(mapper.toEnum(WeirdEnumATransformer.INSTANCE.apply(enumA).toUpperCase())).isNull();
     }
     assertThat(mapper.toEnum(DUMMY_STRING_VALUE)).isNull();
   }
@@ -94,7 +94,7 @@ public class StringEnumMappers_Custom_Test {
     for (EnumA enumA : EnumA.values()) {
       assertThat(
           map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).ignoreCase().toString(enumA)
-      ).isEqualTo(WeirdEnumATransformer.INSTANCE.transform(enumA));
+      ).isEqualTo(WeirdEnumATransformer.INSTANCE.apply(enumA));
     }
   }
 
@@ -108,7 +108,7 @@ public class StringEnumMappers_Custom_Test {
     StringEnumMapper<EnumA> mapper = map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).ignoreCase();
 
     for (EnumA enumA : EnumA.values()) {
-      assertThat(mapper.toEnum(WeirdEnumATransformer.INSTANCE.transform(enumA).toLowerCase())).isEqualTo(enumA);
+      assertThat(mapper.toEnum(WeirdEnumATransformer.INSTANCE.apply(enumA).toLowerCase())).isEqualTo(enumA);
     }
   }
 

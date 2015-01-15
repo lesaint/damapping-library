@@ -22,12 +22,12 @@ import javax.annotation.Nonnull;
 *
 * @author Sébastien Lesaint
 */
-enum WeirdEnumATransformer implements EnumToString<EnumA> {
+enum WeirdEnumATransformer implements BijectiveTransformer<EnumA> {
   INSTANCE;
 
-  @Nonnull
   @Override
-  public String transform(@Nonnull EnumA enumValue) {
+  @Nonnull
+  public String apply(@Nonnull EnumA enumValue) {
     switch (enumValue) {
       case VALUE_1:
         return "Foo";

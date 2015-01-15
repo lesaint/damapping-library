@@ -24,7 +24,6 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
@@ -75,7 +74,7 @@ import static java.util.Objects.requireNonNull;
  * <p>
  * Any other String to enum value matching rule is supported using a custom transformation rule, for example:
  * <pre>
- * private static enum CustomBarToString implements StringEnumMapper.EnumToString&lt;EnumA&gt; {
+ * private static enum CustomBarToString implements StringEnumMapper.BijectiveTransformer&lt;EnumA&gt; {
  *   INSTANCE;
  *
  *  {@literal @}Override
@@ -104,7 +103,7 @@ import static java.util.Objects.requireNonNull;
 /*
  * TODO add shorthand for case-sensitive matching on name with optional such as Guava's <T extends Enum<T>>
  * Optional<T> getIfPresent(Class<T>, String)
- * TODO Java8 support: make EnumToString a Functional interface, add methods returning optional instead of null? quid
+ * TODO Java8 support: make BijectiveTransformer a Functional interface, add methods returning optional instead of null? quid
  * of defaults?
  */
 public final class StringEnumMappers {
@@ -141,16 +140,16 @@ public final class StringEnumMappers {
 
     /**
      * Builds a mapper that maps an enum value to and from a String that matches Strings to the result of the
-     * specified {@link EnumToString} instance.
+     * specified {@link BijectiveTransformer} instance.
      *
-     * @param transformer a {@link EnumToString} instance
+     * @param transformer a {@link BijectiveTransformer} instance
      *
      * @return a {@link StringEnumMapper} instance
      *
-     * @throws NullPointerException if the specified {@link EnumToString} instance is {@code null}
+     * @throws NullPointerException if the specified {@link BijectiveTransformer} instance is {@code null}
      */
     @Nonnull
-    StringEnumMapper<T> by(@Nonnull EnumToString<T> transformer);
+    StringEnumMapper<T> by(@Nonnull BijectiveTransformer<T> transformer);
 
   }
 
@@ -168,20 +167,20 @@ public final class StringEnumMappers {
 
     @Override
     @Nonnull
-    public StringEnumMapper<T> by(@Nonnull EnumToString<T> transformer) {
-      return new StringEnumMapperImpl<T>(enumAClass, transformer);
+    public StringEnumMapper<T> by(@Nonnull BijectiveTransformer<T> transformer) {
+      return new StringEnumMapperImpl<>(enumAClass, transformer);
     }
 
     @Override
     @Nonnull
     public StringEnumMapper<T> byName() {
-      return new NameStringEnumMapper<T>(enumAClass, StringEnumMapperDefaults.<T>defaultsToNull());
+      return new NameStringEnumMapper<>(enumAClass, StringEnumMapperDefaults.<T>defaultsToNull());
     }
 
     @Nonnull
     @Override
     public StringEnumMapper<T> byToString() {
-      return new ToStringStringEnumMapper<T>(enumAClass, StringEnumMapperDefaults.<T>defaultsToNull());
+      return new ToStringStringEnumMapper<>(enumAClass, StringEnumMapperDefaults.<T>defaultsToNull());
     }
   }
 
@@ -199,19 +198,19 @@ public final class StringEnumMappers {
     @Nonnull
     private final Class<E> clazz;
     @Nonnull
-    private final EnumToString<E> transformer;
+    private final BijectiveTransformer<E> transformer;
     @Nonnull
     private final MappingDefaults<String> stringDefaults;
     @Nonnull
     private final MappingDefaults<E> enumDefaults;
     private final boolean ignoreCase;
 
-    private StringEnumMapperImpl(@Nonnull Class<E> clazz, @Nonnull EnumToString<E> transformer) {
+    private StringEnumMapperImpl(@Nonnull Class<E> clazz, @Nonnull BijectiveTransformer<E> transformer) {
       this(clazz, transformer, null, null, false);
     }
 
     private StringEnumMapperImpl(@Nonnull Class<E> clazz,
-                                 @Nonnull EnumToString<E> transformer,
+                                 @Nonnull BijectiveTransformer<E> transformer,
                                  @Nullable MappingDefaults<String> stringDefaults,
                                  @Nullable MappingDefaults<E> enumDefaults,
                                  boolean ignoreCase) {
@@ -232,7 +231,7 @@ public final class StringEnumMappers {
         return stringDefaults.whenNull();
       }
 
-      return transformer.transform(enumValue);
+      return transformer.apply(enumValue);
     }
 
     @Nullable
@@ -247,7 +246,7 @@ public final class StringEnumMappers {
       }
 
       for (E e : clazz.getEnumConstants()) {
-        if (compare(transformer.transform(e), str) == 0) {
+        if (compare(transformer.apply(e), str) == 0) {
           return e;
         }
       }
@@ -276,7 +275,7 @@ public final class StringEnumMappers {
       if (ignoreCase) {
         return this;
       }
-      return new StringEnumMapperImpl<E>(clazz, transformer, stringDefaults, enumDefaults, true);
+      return new StringEnumMapperImpl<>(clazz, transformer, stringDefaults, enumDefaults, true);
     }
 
     /*====================*
@@ -302,20 +301,20 @@ public final class StringEnumMappers {
     }
 
     /*==========*
-         * defaults *
-         *==========*/
+     * defaults *
+     *==========*/
     @Nonnull
     @Override
     public StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
       requireNonNull(defaults, NUll_MAPPING_DEFAULTS_ERROR_MSG);
-      return new StringEnumMapperImpl<E>(clazz, transformer, this.stringDefaults, defaults, ignoreCase);
+      return new StringEnumMapperImpl<>(clazz, transformer, this.stringDefaults, defaults, ignoreCase);
     }
 
     @Nonnull
     @Override
     public StringEnumMapper<E> withDefault(@Nonnull String defaultValue) {
       requireNonNull(defaultValue, NUll_DEFAULT_VALUE_ERROR_MSG);
-      return new StringEnumMapperImpl<E>(
+      return new StringEnumMapperImpl<>(
           clazz,
           transformer,
           MappingDefaults.defaultTo(defaultValue),
@@ -328,7 +327,7 @@ public final class StringEnumMappers {
     @Override
     public StringEnumMapper<E> withDefault(@Nonnull E defaultValueForAll) {
       requireNonNull(defaultValueForAll, NUll_DEFAULT_VALUE_ERROR_MSG);
-      return new StringEnumMapperImpl<E>(
+      return new StringEnumMapperImpl<>(
           clazz,
           transformer,
           this.stringDefaults,
@@ -341,7 +340,7 @@ public final class StringEnumMappers {
     @Override
     public StringEnumMapper<E> withNullDefault(@Nonnull E nullDefaultValue) {
       requireNonNull(nullDefaultValue, NUll_DEFAULT_VALUE_ERROR_MSG);
-      return new StringEnumMapperImpl<E>(
+      return new StringEnumMapperImpl<>(
           clazz,
           transformer,
           this.stringDefaults,
@@ -354,7 +353,7 @@ public final class StringEnumMappers {
     @Override
     public StringEnumMapper<E> withEmptyDefault(@Nonnull E emptyDefaultValue) {
       requireNonNull(emptyDefaultValue, NUll_DEFAULT_VALUE_ERROR_MSG);
-      return new StringEnumMapperImpl<E>(
+      return new StringEnumMapperImpl<>(
           clazz,
           transformer,
           this.stringDefaults,
@@ -367,7 +366,7 @@ public final class StringEnumMappers {
     @Override
     public StringEnumMapper<E> withUnknownDefault(@Nonnull E unknownDefaultValue) {
       requireNonNull(unknownDefaultValue, NUll_DEFAULT_VALUE_ERROR_MSG);
-      return new StringEnumMapperImpl<E>(
+      return new StringEnumMapperImpl<>(
           clazz,
           transformer,
           this.stringDefaults,
@@ -557,13 +556,20 @@ public final class StringEnumMappers {
       this.stringToEnum = stringToEnum;
     }
 
+    /**
+     * Creates a new instance of StringEnumMapperMaps which backing maps will be populated from the result of the
+     * specified BijectiveTransformer.
+     *
+     * @param clazz                an enum type class
+     * @param bijectiveTransformer a {@link BijectiveTransformer}
+     */
     public StringEnumMapperMaps(@Nonnull Class<E> clazz,
-                                @Nonnull Function<E, String> transformer) {
+                                @Nonnull BijectiveTransformer<E> bijectiveTransformer) {
       EnumMap<E, String> enumStrMap = Maps.newEnumMap(clazz);
       ImmutableMap.Builder<String, E> strEnumBuilder = ImmutableMap.builder();
       for (E enumConstant : clazz.getEnumConstants()) {
         String str = requireNonNull(
-            transformer.apply(enumConstant),
+            bijectiveTransformer.apply(enumConstant),
             "String representation of value " + enumConstant + " can not be null"
         );
         enumStrMap.put(enumConstant, str);
@@ -661,7 +667,7 @@ public final class StringEnumMappers {
     }
 
     @Nonnull
-    protected abstract Function<E, String> getEnumToStringTransformer();
+    protected abstract BijectiveTransformer<E> getEnumToStringTransformer();
 
     /*=================*
      * Mapping methods *
@@ -778,7 +784,7 @@ public final class StringEnumMappers {
 
     @Override
     @Nonnull
-    protected Function<E, String> getEnumToStringTransformer() {
+    protected BijectiveTransformer<E> getEnumToStringTransformer() {
       return new EnumNameFunction<E>();
     }
 
@@ -911,7 +917,7 @@ public final class StringEnumMappers {
 
     @Override
     @Nonnull
-    protected Function<E, String> getEnumToStringTransformer() {
+    protected BijectiveTransformer<E> getEnumToStringTransformer() {
       return new EnumNameFunction<E>();
     }
 
@@ -1040,7 +1046,7 @@ public final class StringEnumMappers {
 
     @Override
     @Nonnull
-    protected Function<E, String> getEnumToStringTransformer() {
+    protected BijectiveTransformer<E> getEnumToStringTransformer() {
       return new EnumToStringFunction<>();
     }
 
@@ -1173,7 +1179,7 @@ public final class StringEnumMappers {
 
     @Override
     @Nonnull
-    protected Function<E, String> getEnumToStringTransformer() {
+    protected BijectiveTransformer<E> getEnumToStringTransformer() {
       return new EnumToStringFunction<>();
     }
 
@@ -1285,33 +1291,27 @@ public final class StringEnumMappers {
   }
 
   /**
-   * Function that transforms an enum value into the String returned by its name method.
+   * A BijectiveTransformer that uses the name method of the specified enum value.
    *
    * @param <E> any enum type
    */
-  private static class EnumNameFunction<E extends Enum<E>> implements Function<E, String> {
+  private static class EnumNameFunction<E extends Enum<E>> implements BijectiveTransformer<E> {
     @Override
-    @Nullable
-    public String apply(@Nullable E input) {
-      if (input == null) {
-        return null;
-      }
+    @Nonnull
+    public String apply(@Nonnull E input) {
       return input.name();
     }
   }
 
   /**
-   * Function that transforms an enum value into the String returned by its toString method.
+   * A BijectiveTransformer that uses the name method of the specified enum value.
    *
    * @param <E> any enum type
    */
-  private static class EnumToStringFunction<E extends Enum<E>> implements Function<E, String> {
+  private static class EnumToStringFunction<E extends Enum<E>> implements BijectiveTransformer<E> {
     @Override
-    @Nullable
-    public String apply(@Nullable E input) {
-      if (input == null) {
-        return null;
-      }
+    @Nonnull
+    public String apply(@Nonnull E input) {
       return input.toString();
     }
   }
