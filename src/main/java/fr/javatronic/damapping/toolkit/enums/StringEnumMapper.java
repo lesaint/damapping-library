@@ -20,12 +20,23 @@ import fr.javatronic.damapping.toolkit.MappingDefaults;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 
 /**
  * Interface implemented by all mapper mapping an enum to and from a String.
+ * <p>
+ * It exposes methods to map to and from a String and to and from an enum. It also exposes methods to creates new
+ * StringEnumMapper instances which have slightly different behavior, being either different defaults, exceptions or a
+ * case insensitive behavior.
+ * </p>
+ * <p>
+ * <strong>implementation constraints:</strong><br/>
+ * Implementations of this interface must be immutable.
+ * </p>
  *
- * @param <E> an enum type
+ * @param <E> any enum type
  */
+@Immutable
 public interface StringEnumMapper<E extends Enum<E>> {
   /*=================*
    * Mapping methods *
