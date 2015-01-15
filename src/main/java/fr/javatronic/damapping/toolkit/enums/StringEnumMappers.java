@@ -18,13 +18,14 @@ package fr.javatronic.damapping.toolkit.enums;
 import fr.javatronic.damapping.toolkit.BiMapping;
 import fr.javatronic.damapping.toolkit.MappingDefaults;
 
+import java.util.EnumMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.util.Objects.requireNonNull;
@@ -566,17 +567,17 @@ public final class StringEnumMappers {
       super(clazz, defaults);
 
       Function<E, String> transformer = getEnumToStringTransformer();
-      ImmutableBiMap.Builder<E, String> enumStrBuilder = ImmutableBiMap.builder();
-      ImmutableBiMap.Builder<String, E> strEnumBuilder = ImmutableBiMap.builder();
+      EnumMap<E, String> enumStrMap = Maps.newEnumMap(clazz);
+      ImmutableMap.Builder<String, E> strEnumBuilder = ImmutableMap.builder();
       for (E enumConstant : clazz.getEnumConstants()) {
         String str = requireNonNull(
             transformer.apply(enumConstant),
             "String representation of value " + enumConstant + " can not be null"
         );
-        enumStrBuilder.put(enumConstant, str);
+        enumStrMap.put(enumConstant, str);
         strEnumBuilder.put(str, enumConstant);
       }
-      this.enumToString = enumStrBuilder.build();
+      this.enumToString = Maps.immutableEnumMap(enumStrMap);
       this.stringToEnum = strEnumBuilder.build();
     }
 
