@@ -15,6 +15,14 @@
  */
 package fr.javatronic.damapping.toolkit.enums;
 
+import java.util.Iterator;
+import java.util.List;
+import javax.annotation.Nullable;
+import com.google.common.base.Function;
+
+import static com.google.common.collect.FluentIterable.from;
+import static java.util.Objects.requireNonNull;
+
 /**
  * EnumA -
  *
@@ -23,8 +31,34 @@ package fr.javatronic.damapping.toolkit.enums;
 enum EnumA {
   VALUE_1, VALUE_2, VALUE_3;
 
+  /**
+   * Overrides method toString() so that its behavior is different from name(): it returns the name in lowercase.
+   *
+   * @return a {@link String}
+   */
   @Override
   public String toString() {
     return name().toLowerCase();
+  }
+
+  public static Iterator<Object[]> createCombination(List<StringEnumMapper<EnumA>> baseEnumMappers,
+                                                     Function<StringEnumMapper<EnumA>, List<StringEnumMapper<EnumA>>>
+                                                         fct) {
+    return from(baseEnumMappers)
+        .transformAndConcat(fct)
+        .transform(WrapIntoObjectArray.INSTANCE)
+        .toList()
+        .iterator();
+  }
+
+  private static enum WrapIntoObjectArray implements Function<Object, Object[]> {
+    INSTANCE;
+
+    @Nullable
+    @Override
+    public Object[] apply(@Nullable Object input) {
+      requireNonNull(input);
+      return new Object[]{input};
+    }
   }
 }
