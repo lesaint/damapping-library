@@ -18,7 +18,7 @@ package fr.javatronic.damapping.toolkit;
 import javax.annotation.Nonnull;
 
 /**
- * BiMapping - Represents a bidirectional mapping.
+ * BiMapping - Represents a bijective mapping.
  *
  * @author Sébastien Lesaint
  */
