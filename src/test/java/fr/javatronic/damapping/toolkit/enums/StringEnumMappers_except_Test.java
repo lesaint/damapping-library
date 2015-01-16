@@ -20,7 +20,6 @@ import fr.javatronic.damapping.toolkit.Mappings;
 
 import java.util.Iterator;
 import java.util.List;
-
 import javax.annotation.Nullable;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
@@ -37,10 +36,9 @@ public class StringEnumMappers_except_Test {
       StringEnumMappers.map(EnumA.class).byName(),
       StringEnumMappers.map(EnumA.class).byName().ignoreCase(),
       StringEnumMappers.map(EnumA.class).byToString(),
-      StringEnumMappers.map(EnumA.class).byToString().ignoreCase()
-//            ,
-//            StringEnumMappers.map(EnumA.class).by(WeirdEnumATransformer.INSTANCE),
-//            StringEnumMappers.map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).ignoreCase()
+      StringEnumMappers.map(EnumA.class).byToString().ignoreCase(),
+      StringEnumMappers.map(EnumA.class).by(WeirdEnumATransformer.INSTANCE),
+      StringEnumMappers.map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).ignoreCase()
   );
 
   private static final EnumA NULL_ENUM = (EnumA) null;
@@ -64,7 +62,8 @@ public class StringEnumMappers_except_Test {
   }
 
   @Test(dataProvider = "base_mappers")
-  public void except_enum_to_string_affects_mapping_only_from_the_specified_enum_value(StringEnumMapper<EnumA> mapper) throws Exception {
+  public void except_enum_to_string_affects_mapping_only_from_the_specified_enum_value(StringEnumMapper<EnumA> mapper)
+      throws Exception {
     StringEnumMapper<EnumA> exceptMapper = mapper.except(VALUE_1, SOME_STRING);
 
     for (EnumA enumA : EnumA.values()) {
@@ -78,7 +77,8 @@ public class StringEnumMappers_except_Test {
   }
 
   @Test(dataProvider = "base_mappers")
-  public void except_enum_to_string_does_not_change_mapping_from_string(StringEnumMapper<EnumA> mapper) throws Exception {
+  public void except_enum_to_string_does_not_change_mapping_from_string(StringEnumMapper<EnumA> mapper)
+      throws Exception {
     StringEnumMapper<EnumA> exceptMapper = mapper.except(VALUE_1, SOME_STRING);
 
     for (EnumA enumA : EnumA.values()) {
@@ -96,7 +96,8 @@ public class StringEnumMappers_except_Test {
   }
 
   @Test(dataProvider = "base_mappers")
-  public void except_string_to_enum_affects_mapping_only_from_the_specified_string_value(StringEnumMapper<EnumA> mapper) throws Exception {
+  public void except_string_to_enum_affects_mapping_only_from_the_specified_string_value(StringEnumMapper<EnumA> mapper)
+      throws Exception {
     StringEnumMapper<EnumA> exceptMapper = mapper.except(SOME_STRING, VALUE_1);
 
     for (EnumA enumA : EnumA.values()) {
@@ -106,7 +107,8 @@ public class StringEnumMappers_except_Test {
   }
 
   @Test(dataProvider = "base_mappers")
-  public void except_bimapping_overwrites_mapping_from_enum_and_adds_one_from_string(StringEnumMapper<EnumA> mapper) throws Exception {
+  public void except_bimapping_overwrites_mapping_from_enum_and_adds_one_from_string(StringEnumMapper<EnumA> mapper)
+      throws Exception {
     StringEnumMapper<EnumA> exceptMapper = mapper.except(Mappings.bimapping(VALUE_1, SOME_STRING));
 
     assertThat(mapper.toEnum(SOME_STRING)).isNull();
