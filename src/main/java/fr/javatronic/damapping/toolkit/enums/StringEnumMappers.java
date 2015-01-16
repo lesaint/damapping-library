@@ -166,20 +166,20 @@ public final class StringEnumMappers {
 
     @Override
     @Nonnull
-    public StringEnumMapper<T> by(@Nonnull BijectiveTransformer<T> transformer) {
-      return new CustomStringEnumMapper<>(enumAClass, transformer, StringEnumMapperDefaults.<T>defaultsToNull());
-    }
-
-    @Override
-    @Nonnull
     public StringEnumMapper<T> byName() {
-      return new NameStringEnumMapper<>(enumAClass, StringEnumMapperDefaults.<T>defaultsToNull());
+      return new BijectiveTransformerStringEnumMapper<>(enumAClass, new EnumNameFunction<T>(), StringEnumMapperDefaults.<T>defaultsToNull());
     }
 
     @Nonnull
     @Override
     public StringEnumMapper<T> byToString() {
-      return new ToStringStringEnumMapper<>(enumAClass, StringEnumMapperDefaults.<T>defaultsToNull());
+      return new BijectiveTransformerStringEnumMapper<>(enumAClass, new EnumToStringFunction<T>(), StringEnumMapperDefaults.<T>defaultsToNull());
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<T> by(@Nonnull BijectiveTransformer<T> transformer) {
+      return new BijectiveTransformerStringEnumMapper<>(enumAClass, transformer, StringEnumMapperDefaults.<T>defaultsToNull());
     }
   }
 
@@ -568,512 +568,13 @@ public final class StringEnumMappers {
     }
   }
 
-  /**
-   * Implementation of a StringEnumMapper that matches String to and from enum values using the enum's name method,
-   * uses a case insensitive comparison to compare an input String to name() result and is backed by Maps.
-   *
-   * @param <E> any enum type
-   */
-  private static class NameInsensitiveStringEnumMapper<E extends Enum<E>>
-      extends CaseInsensitiveMapStringEnumMapper<E>
-      implements StringEnumMapper<E> {
-
-    protected NameInsensitiveStringEnumMapper(@Nonnull Class<E> clazz,
-                                              @Nonnull StringEnumMapperMaps<E> maps,
-                                              @Nonnull StringEnumMapperDefaults<E> defaults) {
-      super(clazz, maps, defaults);
-    }
-
-    /*=============*
-     * case switch *
-     *=============*/
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> ignoreCase() {
-      return this;
-    }
-
-    /*====================*
-     * Mapping exceptions *
-     *====================*/
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> except(@Nonnull E enumValue, @Nullable String str) {
-      return new NameInsensitiveStringEnumMapper<>(
-          this.clazz,
-          this.maps.except(enumValue, str),
-          this.defaults
-      );
-    }
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> except(@Nonnull String str, @Nullable E e) {
-      return new NameInsensitiveStringEnumMapper<>(
-          this.clazz,
-          this.maps.except(str, e),
-          this.defaults
-      );
-    }
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> except(@Nonnull BiMapping<E, String> exceptionMapping) {
-      return new NameInsensitiveStringEnumMapper<>(
-          this.clazz,
-          this.maps.except(exceptionMapping),
-          this.defaults
-      );
-    }
-
-    /*==========*
-     * defaults *
-     *==========*/
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
-      return new NameInsensitiveStringEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withEnumDefaults(defaults)
-      );
-    }
-
-    @Nonnull
-    @Override
-    public StringEnumMapper<E> withDefault(@Nonnull String defaultValue) {
-      return new NameInsensitiveStringEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withDefault(defaultValue)
-      );
-    }
-
-    @Nonnull
-    @Override
-    public StringEnumMapper<E> withDefault(@Nonnull E defaultValueForAll) {
-      return new NameInsensitiveStringEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withDefault(defaultValueForAll)
-      );
-    }
-
-    @Nonnull
-    @Override
-    public StringEnumMapper<E> withNullDefault(@Nonnull E nullDefaultValue) {
-      return new NameInsensitiveStringEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withNullDefault(nullDefaultValue)
-      );
-    }
-
-    @Nonnull
-    @Override
-    public StringEnumMapper<E> withEmptyDefault(@Nonnull E emptyDefaultValue) {
-      return new NameInsensitiveStringEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withEmptyDefault(emptyDefaultValue)
-      );
-    }
-
-    @Nonnull
-    @Override
-    public StringEnumMapper<E> withUnknownDefault(@Nonnull E unknownDefaultValue) {
-      return new NameInsensitiveStringEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withUnknownDefault(unknownDefaultValue)
-      );
-    }
-  }
-
-  /**
-   * Implementation of a StringEnumMapper that matches String to and from enum values using the enum's name method,
-   * uses a case sensitive comparison to compare an input String to name() result and is backed by Maps.
-   *
-   * @param <E> any enum type
-   */
-  private static class NameStringEnumMapper<E extends Enum<E>>
-      extends CaseSensitiveMapStringEnumMapper<E>
-      implements StringEnumMapper<E> {
-
-    public NameStringEnumMapper(@Nonnull Class<E> clazz, @Nonnull StringEnumMapperDefaults<E> defaults) {
-      super(clazz, new EnumNameFunction<E>(), defaults);
-    }
-
-    private NameStringEnumMapper(@Nonnull Class<E> clazz,
-                                 @Nonnull StringEnumMapperMaps<E> maps,
-                                 @Nonnull StringEnumMapperDefaults<E> defaults) {
-      super(clazz, maps, defaults);
-    }
-
-    /*=============*
-     * case switch *
-     *=============*/
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> ignoreCase() {
-      return new NameInsensitiveStringEnumMapper<>(clazz, maps, defaults);
-    }
-
-    /*====================*
-     * Mapping exceptions *
-     *====================*/
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> except(@Nonnull E enumValue, @Nullable String str) {
-      return new NameStringEnumMapper<>(
-          this.clazz,
-          this.maps.except(enumValue, str),
-          this.defaults
-      );
-    }
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> except(@Nonnull String str, @Nullable E e) {
-      return new NameStringEnumMapper<>(
-          this.clazz,
-          this.maps.except(str, e),
-          this.defaults
-      );
-    }
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> except(@Nonnull BiMapping<E, String> exceptionMapping) {
-      return new NameStringEnumMapper<>(
-          this.clazz,
-          this.maps.except(exceptionMapping),
-          this.defaults
-      );
-    }
-
-    /*==========*
-     * defaults *
-     *==========*/
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
-      return new NameStringEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withEnumDefaults(defaults)
-      );
-    }
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> withDefault(@Nonnull String defaultValue) {
-      return new NameStringEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withDefault(defaultValue)
-      );
-    }
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> withDefault(@Nonnull E defaultValueForAll) {
-      return new NameStringEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withDefault(defaultValueForAll)
-      );
-    }
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> withNullDefault(@Nonnull E nullDefaultValue) {
-      return new NameStringEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withNullDefault(nullDefaultValue)
-      );
-    }
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> withEmptyDefault(@Nonnull E emptyDefaultValue) {
-      return new NameStringEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withEmptyDefault(emptyDefaultValue)
-      );
-    }
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> withUnknownDefault(@Nonnull E unknownDefaultValue) {
-      return new NameStringEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withUnknownDefault(unknownDefaultValue)
-      );
-    }
-  }
-
-  /**
-   * Implementation of a StringEnumMapper that matches String to and from enum values using the enum's toString method,
-   * uses a case insensitive comparison to compare an input String to toString() result and is backed by Maps.
-   *
-   * @param <E> any enum type
-   */
-  private static class ToStringInsensitiveEnumMapper<E extends Enum<E>>
-      extends CaseInsensitiveMapStringEnumMapper<E>
-      implements StringEnumMapper<E> {
-
-    protected ToStringInsensitiveEnumMapper(@Nonnull Class<E> clazz,
-                                            @Nonnull StringEnumMapperMaps<E> maps,
-                                            @Nonnull StringEnumMapperDefaults<E> defaults) {
-      super(clazz, maps, defaults);
-    }
-
-    /*=============*
-     * case switch *
-     *=============*/
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> ignoreCase() {
-      return this;
-    }
-
-    /*====================*
-     * Mapping exceptions *
-     *====================*/
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> except(@Nonnull E enumValue, @Nullable String str) {
-      return new ToStringInsensitiveEnumMapper<>(
-          this.clazz,
-          this.maps.except(enumValue, str),
-          this.defaults
-      );
-    }
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> except(@Nonnull String str, @Nullable E e) {
-      return new ToStringInsensitiveEnumMapper<>(
-          this.clazz,
-          this.maps.except(str, e),
-          this.defaults
-      );
-    }
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> except(@Nonnull BiMapping<E, String> exceptionMapping) {
-      return new ToStringInsensitiveEnumMapper<>(
-          this.clazz,
-          this.maps.except(exceptionMapping),
-          this.defaults
-      );
-    }
-
-    /*==========*
-     * defaults *
-     *==========*/
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
-      return new ToStringInsensitiveEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withEnumDefaults(defaults)
-      );
-    }
-
-    @Nonnull
-    @Override
-    public StringEnumMapper<E> withDefault(@Nonnull String defaultValue) {
-      return new ToStringInsensitiveEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withDefault(defaultValue)
-      );
-    }
-
-    @Nonnull
-    @Override
-    public StringEnumMapper<E> withDefault(@Nonnull E defaultValueForAll) {
-      return new ToStringInsensitiveEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withDefault(defaultValueForAll)
-      );
-    }
-
-    @Nonnull
-    @Override
-    public StringEnumMapper<E> withNullDefault(@Nonnull E nullDefaultValue) {
-      return new ToStringInsensitiveEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withNullDefault(nullDefaultValue)
-      );
-    }
-
-    @Nonnull
-    @Override
-    public StringEnumMapper<E> withEmptyDefault(@Nonnull E emptyDefaultValue) {
-      return new ToStringInsensitiveEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withEmptyDefault(emptyDefaultValue)
-      );
-    }
-
-    @Nonnull
-    @Override
-    public StringEnumMapper<E> withUnknownDefault(@Nonnull E unknownDefaultValue) {
-      return new ToStringInsensitiveEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withUnknownDefault(unknownDefaultValue)
-      );
-    }
-  }
-
-  /**
-   * Implementation of a StringEnumMapper that matches String to and from enum values using the enum's toString method,
-   * uses a case sensitive comparison to compare an input String to toString() result and is backed by Maps.
-   *
-   * @param <E> any enum type
-   */
-  private static class ToStringStringEnumMapper<E extends Enum<E>>
-      extends CaseSensitiveMapStringEnumMapper<E>
-      implements StringEnumMapper<E> {
-
-    public ToStringStringEnumMapper(@Nonnull Class<E> clazz, @Nonnull StringEnumMapperDefaults<E> defaults) {
-      super(clazz, new EnumToStringFunction<E>(), defaults);
-    }
-
-    private ToStringStringEnumMapper(@Nonnull Class<E> clazz,
-                                     @Nonnull StringEnumMapperMaps<E> maps,
-                                     @Nonnull StringEnumMapperDefaults<E> defaults) {
-      super(clazz, maps, defaults);
-    }
-
-    /*=============*
-     * case switch *
-     *=============*/
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> ignoreCase() {
-      return new ToStringInsensitiveEnumMapper<>(clazz, maps, defaults);
-    }
-
-    /*====================*
-     * Mapping exceptions *
-     *====================*/
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> except(@Nonnull E enumValue, @Nullable String str) {
-      return new ToStringStringEnumMapper<>(
-          this.clazz,
-          this.maps.except(enumValue, str),
-          this.defaults
-      );
-    }
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> except(@Nonnull String str, @Nullable E e) {
-      return new ToStringStringEnumMapper<>(
-          this.clazz,
-          this.maps.except(str, e),
-          this.defaults
-      );
-    }
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> except(@Nonnull BiMapping<E, String> exceptionMapping) {
-      return new ToStringStringEnumMapper<>(
-          this.clazz,
-          this.maps.except(exceptionMapping),
-          this.defaults
-      );
-    }
-
-    /*==========*
-     * defaults *
-     *==========*/
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
-      return new ToStringStringEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withEnumDefaults(defaults)
-      );
-    }
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> withDefault(@Nonnull String defaultValue) {
-      return new ToStringStringEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withDefault(defaultValue)
-      );
-    }
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> withDefault(@Nonnull E defaultValueForAll) {
-      return new ToStringStringEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withDefault(defaultValueForAll)
-      );
-    }
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> withNullDefault(@Nonnull E nullDefaultValue) {
-      return new ToStringStringEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withNullDefault(nullDefaultValue)
-      );
-    }
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> withEmptyDefault(@Nonnull E emptyDefaultValue) {
-      return new ToStringStringEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withEmptyDefault(emptyDefaultValue)
-      );
-    }
-
-    @Override
-    @Nonnull
-    public StringEnumMapper<E> withUnknownDefault(@Nonnull E unknownDefaultValue) {
-      return new ToStringStringEnumMapper<>(
-          this.clazz,
-          this.maps,
-          this.defaults.withUnknownDefault(unknownDefaultValue)
-      );
-    }
-  }
-
-  private static class CaseInsensitiveCustomerStringEnumMapper<E extends Enum<E>>
+  private static class CaseInsensitiveBijectiveTransformertringEnumMapper<E extends Enum<E>>
    extends CaseInsensitiveMapStringEnumMapper<E>
    implements StringEnumMapper<E> {
-    public CaseInsensitiveCustomerStringEnumMapper(@Nonnull Class<E> clazz,
-                                                   @Nonnull StringEnumMapperMaps<E> maps,
-                                                   @Nonnull StringEnumMapperDefaults<E> defaults) {
+
+    public CaseInsensitiveBijectiveTransformertringEnumMapper(@Nonnull Class<E> clazz,
+                                                              @Nonnull StringEnumMapperMaps<E> maps,
+                                                              @Nonnull StringEnumMapperDefaults<E> defaults) {
       super(clazz, maps, defaults);
     }
 
@@ -1093,7 +594,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> except(@Nonnull E enumValue, @Nullable String str) {
-      return new CaseInsensitiveCustomerStringEnumMapper<>(
+      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(
           this.clazz,
           this.maps.except(enumValue, str),
           this.defaults
@@ -1103,7 +604,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> except(@Nonnull String str, @Nullable E e) {
-      return new CaseInsensitiveCustomerStringEnumMapper<>(
+      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(
           this.clazz,
           this.maps.except(str, e),
           this.defaults
@@ -1113,7 +614,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> except(@Nonnull BiMapping<E, String> exceptionMapping) {
-      return new CaseInsensitiveCustomerStringEnumMapper<>(
+      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(
           this.clazz,
           this.maps.except(exceptionMapping),
           this.defaults
@@ -1126,7 +627,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
-      return new CaseInsensitiveCustomerStringEnumMapper<>(
+      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(
           this.clazz,
           this.maps,
           this.defaults.withEnumDefaults(defaults)
@@ -1136,7 +637,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> withDefault(@Nonnull String defaultValue) {
-      return new CaseInsensitiveCustomerStringEnumMapper<>(
+      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(
           this.clazz,
           this.maps,
           this.defaults.withDefault(defaultValue)
@@ -1146,7 +647,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> withDefault(@Nonnull E defaultValueForAll) {
-      return new CaseInsensitiveCustomerStringEnumMapper<>(
+      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(
           this.clazz,
           this.maps,
           this.defaults.withDefault(defaultValueForAll)
@@ -1156,7 +657,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> withNullDefault(@Nonnull E nullDefaultValue) {
-      return new CaseInsensitiveCustomerStringEnumMapper<>(
+      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(
           this.clazz,
           this.maps,
           this.defaults.withNullDefault(nullDefaultValue)
@@ -1166,7 +667,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> withEmptyDefault(@Nonnull E emptyDefaultValue) {
-      return new CaseInsensitiveCustomerStringEnumMapper<>(
+      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(
           this.clazz,
           this.maps,
           this.defaults.withEmptyDefault(emptyDefaultValue)
@@ -1176,7 +677,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> withUnknownDefault(@Nonnull E unknownDefaultValue) {
-      return new CaseInsensitiveCustomerStringEnumMapper<>(
+      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(
           this.clazz,
           this.maps,
           this.defaults.withUnknownDefault(unknownDefaultValue)
@@ -1184,20 +685,19 @@ public final class StringEnumMappers {
     }
   }
 
-
-  private static class CustomStringEnumMapper<E extends Enum<E>>
+  private static class BijectiveTransformerStringEnumMapper<E extends Enum<E>>
      extends CaseSensitiveMapStringEnumMapper<E>
     implements StringEnumMapper<E> {
 
-    private CustomStringEnumMapper(@Nonnull Class<E> clazz,
-                                  @Nonnull StringEnumMapperMaps<E> maps,
-                                  @Nonnull StringEnumMapperDefaults<E> defaults) {
+    private BijectiveTransformerStringEnumMapper(@Nonnull Class<E> clazz,
+                                                 @Nonnull StringEnumMapperMaps<E> maps,
+                                                 @Nonnull StringEnumMapperDefaults<E> defaults) {
       super(clazz, maps, defaults);
     }
 
-    public CustomStringEnumMapper(@Nonnull Class<E> clazz,
-                                  @Nonnull BijectiveTransformer<E> transformer,
-                                  @Nonnull StringEnumMapperDefaults<E> defaults) {
+    public BijectiveTransformerStringEnumMapper(@Nonnull Class<E> clazz,
+                                                @Nonnull BijectiveTransformer<E> transformer,
+                                                @Nonnull StringEnumMapperDefaults<E> defaults) {
       super(clazz, new StringEnumMapperMaps<>(clazz, transformer), defaults);
     }
 
@@ -1207,7 +707,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> ignoreCase() {
-      return new CaseInsensitiveCustomerStringEnumMapper<>(clazz, maps, defaults);
+      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(clazz, maps, defaults);
     }
 
     /*====================*
@@ -1217,7 +717,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> except(@Nonnull E enumValue, @Nullable String str) {
-      return new CustomStringEnumMapper<>(
+      return new BijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps.except(enumValue, str),
           this.defaults
@@ -1227,7 +727,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> except(@Nonnull String str, @Nullable E e) {
-      return new CustomStringEnumMapper<>(
+      return new BijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps.except(str, e),
           this.defaults
@@ -1237,7 +737,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> except(@Nonnull BiMapping<E, String> exceptionMapping) {
-      return new CustomStringEnumMapper<>(
+      return new BijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps.except(exceptionMapping),
           this.defaults
@@ -1250,7 +750,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
-      return new CustomStringEnumMapper<>(
+      return new BijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps,
           this.defaults.withEnumDefaults(defaults)
@@ -1260,7 +760,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> withDefault(@Nonnull String defaultValue) {
-      return new CustomStringEnumMapper<>(
+      return new BijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps,
           this.defaults.withDefault(defaultValue)
@@ -1270,7 +770,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> withDefault(@Nonnull E defaultValueForAll) {
-      return new CustomStringEnumMapper<>(
+      return new BijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps,
           this.defaults.withDefault(defaultValueForAll)
@@ -1280,7 +780,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> withNullDefault(@Nonnull E nullDefaultValue) {
-      return new CustomStringEnumMapper<>(
+      return new BijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps,
           this.defaults.withNullDefault(nullDefaultValue)
@@ -1290,7 +790,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> withEmptyDefault(@Nonnull E emptyDefaultValue) {
-      return new CustomStringEnumMapper<>(
+      return new BijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps,
           this.defaults.withEmptyDefault(emptyDefaultValue)
@@ -1300,7 +800,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> withUnknownDefault(@Nonnull E unknownDefaultValue) {
-      return new CustomStringEnumMapper<>(
+      return new BijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps,
           this.defaults.withUnknownDefault(unknownDefaultValue)
