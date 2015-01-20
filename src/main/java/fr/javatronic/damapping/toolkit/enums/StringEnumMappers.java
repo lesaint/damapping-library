@@ -215,18 +215,66 @@ public final class StringEnumMappers {
     }
 
     /**
-     * Returns a StringEnumMapperDefaults with the same enum defaults as the current mapper by the specified String
+     * Returns a StringEnumMapperDefaults with the same enum defaults as the current mapper but the specified String
+     * defaults.
+     *
+     * @param defaults a {@link MappingDefaults}
+     *
+     * @return a {@link StringEnumMapperDefaults}
+     */
+    @Nonnull
+    public StringEnumMapperDefaults<E> withStringDefaults(@Nonnull MappingDefaults<String> defaults) {
+      requireNonNull(defaults, NUll_MAPPING_DEFAULTS_ERROR_MSG);
+      return new StringEnumMapperDefaults<>(defaults, this.enumDefaults);
+    }
+
+    /**
+     * Returns a StringEnumMapperDefaults with the same enum defaults as the current mapper but the specified String
      * default.
      *
      * @param defaultValue a {@link MappingDefaults}
      *
-     * @return a {@link StringEnumMapper}
+     * @return a {@link StringEnumMapperDefaults}
      */
     @Nonnull
     public StringEnumMapperDefaults<E> withDefault(@Nonnull String defaultValue) {
       requireNonNull(defaultValue, NUll_DEFAULT_VALUE_ERROR_MSG);
-      return new StringEnumMapperDefaults<E>(
+      return new StringEnumMapperDefaults<>(
           MappingDefaults.defaultTo(defaultValue),
+          this.enumDefaults
+      );
+    }
+
+    /**
+     * Returns a StringEnumMapperDefaults with the same String defaults and the same enum defaults as the current mapper
+     * but will use the specified value when the input enum value is {@code null}.
+     *
+     * @param nullDefaultValue a {@link String}
+     *
+     * @return a {@link StringEnumMapperDefaults}
+     */
+    @Nonnull
+    public StringEnumMapperDefaults<E> withNullDefault(@Nonnull String nullDefaultValue) {
+      requireNonNull(nullDefaultValue, NUll_DEFAULT_VALUE_ERROR_MSG);
+      return new StringEnumMapperDefaults<>(
+          this.stringDefaults.withNullDefault(nullDefaultValue),
+          this.enumDefaults
+      );
+    }
+
+    /**
+     * Returns a StringEnumMapperDefaults with the same String defaults and the same enum defaults as the current mapper
+     * but will use the specified value when the input enum value is unknown.
+     *
+     * @param unknownDefaultValue a {@link String}
+     *
+     * @return a {@link StringEnumMapperDefaults}
+     */
+    @Nonnull
+    public StringEnumMapperDefaults<E> withUnknownDefault(@Nonnull String unknownDefaultValue) {
+      requireNonNull(unknownDefaultValue, NUll_DEFAULT_VALUE_ERROR_MSG);
+      return new StringEnumMapperDefaults<>(
+          this.stringDefaults.withUnknownDefault(unknownDefaultValue),
           this.enumDefaults
       );
     }
@@ -242,7 +290,7 @@ public final class StringEnumMappers {
     @Nonnull
     public StringEnumMapperDefaults<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
       requireNonNull(defaults, NUll_MAPPING_DEFAULTS_ERROR_MSG);
-      return new StringEnumMapperDefaults<E>(this.stringDefaults, defaults);
+      return new StringEnumMapperDefaults<>(this.stringDefaults, defaults);
     }
 
     /**
@@ -256,7 +304,7 @@ public final class StringEnumMappers {
     @Nonnull
     public StringEnumMapperDefaults<E> withDefault(@Nonnull E defaultValueForAll) {
       requireNonNull(defaultValueForAll, NUll_DEFAULT_VALUE_ERROR_MSG);
-      return new StringEnumMapperDefaults<E>(
+      return new StringEnumMapperDefaults<>(
           this.stringDefaults,
           MappingDefaults.defaultTo(defaultValueForAll)
       );
@@ -273,7 +321,7 @@ public final class StringEnumMappers {
     @Nonnull
     public StringEnumMapperDefaults<E> withNullDefault(@Nonnull E nullDefaultValue) {
       requireNonNull(nullDefaultValue, NUll_DEFAULT_VALUE_ERROR_MSG);
-      return new StringEnumMapperDefaults<E>(
+      return new StringEnumMapperDefaults<>(
           this.stringDefaults,
           this.enumDefaults.withNullDefault(nullDefaultValue)
       );
@@ -290,7 +338,7 @@ public final class StringEnumMappers {
     @Nonnull
     public StringEnumMapperDefaults<E> withEmptyDefault(@Nonnull E emptyDefaultValue) {
       requireNonNull(emptyDefaultValue, NUll_DEFAULT_VALUE_ERROR_MSG);
-      return new StringEnumMapperDefaults<E>(
+      return new StringEnumMapperDefaults<>(
           this.stringDefaults,
           this.enumDefaults.withEmptyDefault(emptyDefaultValue)
       );
@@ -307,7 +355,7 @@ public final class StringEnumMappers {
     @Nonnull
     public StringEnumMapperDefaults<E> withUnknownDefault(@Nonnull E unknownDefaultValue) {
       requireNonNull(unknownDefaultValue, NUll_DEFAULT_VALUE_ERROR_MSG);
-      return new StringEnumMapperDefaults<E>(
+      return new StringEnumMapperDefaults<>(
           this.stringDefaults,
           this.enumDefaults.withUnknownDefault(unknownDefaultValue)
       );
@@ -321,7 +369,7 @@ public final class StringEnumMappers {
      * @return a {@link StringEnumMapper}
      */
     public static <T extends Enum<T>> StringEnumMapperDefaults<T> defaultsToNull() {
-      return new StringEnumMapperDefaults<T>(
+      return new StringEnumMapperDefaults<>(
           MappingDefaults.<String>defaultToNull(),
           MappingDefaults.<T>defaultToNull()
       );
@@ -405,7 +453,12 @@ public final class StringEnumMappers {
     @Nonnull
     private ImmutableMap<E, String> exceptEnumMap(E enumValue, String str) {
       EnumMap<E, String> enumMap = Maps.newEnumMap(this.enumToString);
-      enumMap.put(enumValue, str);
+      if (str == null) {
+        enumMap.remove(enumValue);
+      }
+      else {
+        enumMap.put(enumValue, str);
+      }
       return Maps.immutableEnumMap(enumMap);
     }
 
@@ -414,12 +467,12 @@ public final class StringEnumMappers {
       requireNonNull(str, "Can not create an except for a null String");
       return new StringEnumMapperMaps<>(
           this.enumToString,
-          excepStringMap(str, e)
+          exceptStringMap(str, e)
       );
     }
 
     @Nonnull
-    private ImmutableMap<String, E> excepStringMap(String str, E e) {
+    private ImmutableMap<String, E> exceptStringMap(String str, E e) {
       HashMap<String, E> map = Maps.newHashMap(this.stringToEnum);
       map.put(str, e);
       return ImmutableMap.copyOf(map);
@@ -430,7 +483,7 @@ public final class StringEnumMappers {
       requireNonNull(exceptionMapping, "BiMapping can not be null");
       return new StringEnumMapperMaps<>(
           exceptEnumMap(exceptionMapping.from(), exceptionMapping.to()),
-          excepStringMap(exceptionMapping.to(), exceptionMapping.from())
+          exceptStringMap(exceptionMapping.to(), exceptionMapping.from())
       );
     }
   }
@@ -478,7 +531,11 @@ public final class StringEnumMappers {
         return defaults.getStringDefaults().whenNull();
       }
 
-      return maps.getEnumToString().get(enumValue);
+      String res = maps.getEnumToString().get(enumValue);
+      if (res == null) {
+        return defaults.getStringDefaults().whenUnknown();
+      }
+      return res;
     }
   }
 
@@ -623,11 +680,11 @@ public final class StringEnumMappers {
      *==========*/
     @Override
     @Nonnull
-    public StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
+    public StringEnumMapper<E> withStringDefaults(@Nonnull MappingDefaults<String> defaults) {
       return new CaseInsensitiveBijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps,
-          this.defaults.withEnumDefaults(defaults)
+          this.defaults.withStringDefaults(defaults)
       );
     }
 
@@ -638,6 +695,36 @@ public final class StringEnumMappers {
           this.clazz,
           this.maps,
           this.defaults.withDefault(defaultValue)
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withNullDefault(@Nonnull String nullDefaultValue) {
+      return new CaseInsensitiveBijectiveTransformerStringEnumMapper<>(
+          this.clazz,
+          this.maps,
+          this.defaults.withNullDefault(nullDefaultValue)
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withUnknownDefault(@Nonnull String unknownDefaultValue) {
+      return new CaseInsensitiveBijectiveTransformerStringEnumMapper<>(
+          this.clazz,
+          this.maps,
+          this.defaults.withUnknownDefault(unknownDefaultValue)
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
+      return new CaseInsensitiveBijectiveTransformerStringEnumMapper<>(
+          this.clazz,
+          this.maps,
+          this.defaults.withEnumDefaults(defaults)
       );
     }
 
@@ -746,11 +833,11 @@ public final class StringEnumMappers {
      *==========*/
     @Override
     @Nonnull
-    public StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
+    public StringEnumMapper<E> withStringDefaults(@Nonnull MappingDefaults<String> defaults) {
       return new BijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps,
-          this.defaults.withEnumDefaults(defaults)
+          this.defaults.withStringDefaults(defaults)
       );
     }
 
@@ -761,6 +848,36 @@ public final class StringEnumMappers {
           this.clazz,
           this.maps,
           this.defaults.withDefault(defaultValue)
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withNullDefault(@Nonnull String nullDefaultValue) {
+      return new BijectiveTransformerStringEnumMapper<>(
+          this.clazz,
+          this.maps,
+          this.defaults.withNullDefault(nullDefaultValue)
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withUnknownDefault(@Nonnull String unknownDefaultValue) {
+      return new BijectiveTransformerStringEnumMapper<>(
+          this.clazz,
+          this.maps,
+          this.defaults.withUnknownDefault(unknownDefaultValue)
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
+      return new BijectiveTransformerStringEnumMapper<>(
+          this.clazz,
+          this.maps,
+          this.defaults.withEnumDefaults(defaults)
       );
     }
 

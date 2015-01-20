@@ -220,7 +220,47 @@ public interface StringEnumMapper<E extends Enum<E>> {
 
   /**
    * Returns a mapper that will map an enum to and from a String the same way as the current mapper but will in
+   * addition (or in place) use the specified defaults when mapping from an enum value.
+   *
+   * @param defaults a {@link MappingDefaults}
+   *
+   * @return a {@link StringEnumMapper}
+   */
+  @Nonnull
+  StringEnumMapper<E> withStringDefaults(@Nonnull MappingDefaults<String> defaults);
+
+  /**
+   * Creates a new mapper that will map an enum to and from a String the same way as the current mapper but will in
    * addition return the specified String value when mapping from a {@code null} enum value.
+   *
+   * @param nullDefaultValue the default String
+   *
+   * @return a StringEnumMapper instance
+   *
+   * @throws NullPointerException if nullDefaultValue is {@code null}
+   * @see StringEnumMapper#toEnum(String)
+   */
+  @Nonnull
+  StringEnumMapper<E> withNullDefault(@Nonnull String nullDefaultValue);
+
+  /**
+   * Creates a new mapper that will map an enum to and from a String the same way as the current mapper but will in
+   * addition return the specified String value when mapping from an enum value that is not mapped to any String and is
+   * not {@code null}.
+   *
+   * @param unknownDefaultValue the default String
+   *
+   * @return a StringEnumMapper instance
+   *
+   * @throws NullPointerException if unknownDefaultValue is {@code null}
+   * @see StringEnumMapper#toEnum(String)
+   */
+  @Nonnull
+  StringEnumMapper<E> withUnknownDefault(@Nonnull String unknownDefaultValue);
+
+  /**
+   * Returns a mapper that will map an enum to and from a String the same way as the current mapper but will in
+   * addition return the specified String value when mapping from a {@code null} or unknown enum value.
    *
    * @param defaultValue the default String
    *

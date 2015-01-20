@@ -50,24 +50,93 @@ public class StringEnumMapper_defaults_Test<T extends Enum<T>> {
       byCustomIgnoreCase()
   );
 
-  @Test(dataProvider = "stringEnumMappers_withDefault_string")
-  public void withDefault_returns_default_value_when_enum_is_null(StringEnumMapper<T> mapper) throws Exception {
+  @Test(dataProvider = "stringEnumMappers_withSameDefault_string_for_all_cases")
+  public void withDefault_returns_default_value_when_enum_is_null_or_unknown(StringEnumMapper<EnumA> mapper) throws Exception {
     assertThat(mapper.toString(null)).isEqualTo(DEFAULT_STRING_VALUE);
+    assertThat(mapper.except(VALUE_1, null).toString(VALUE_1)).isEqualTo(DEFAULT_STRING_VALUE);
   }
 
   /**
    * Creates the combination of calls to withDefault(Enum) for every StringEnumMapper.
    */
   @DataProvider
-  public StringEnumMapper[][] stringEnumMappers_withDefault_string() {
-    return new StringEnumMapper[][]{
-        {byName().withDefault(DEFAULT_STRING_VALUE)},
-        {byNameIgnoreCase().withDefault(DEFAULT_STRING_VALUE)},
-    };
+  public Iterator<Object[]> stringEnumMappers_withSameDefault_string_for_all_cases() {
+    return EnumA.createCombination(
+        BASE_ENUM_MAPPERS,
+        new Function<StringEnumMapper<EnumA>, List<StringEnumMapper<EnumA>>>() {
+          @Nullable
+          @Override
+          public List<StringEnumMapper<EnumA>> apply(@Nullable StringEnumMapper<EnumA> input) {
+            return of(
+                input.withDefault(DEFAULT_STRING_VALUE),
+                input.withNullDefault(DEFAULT_STRING_VALUE).withUnknownDefault(DEFAULT_STRING_VALUE),
+                input.withStringDefaults(MappingDefaults.defaultTo(DEFAULT_STRING_VALUE))
+            );
+          }
+        }
+    );
   }
 
-  @Test(dataProvider = "stringEnumMappers_withSameDefault_for_all_cases")
-  public void withDefault_returns_default_value_when_enum_is_null_empty_or_unknown(StringEnumMapper<T> mapper)
+  @Test(dataProvider = "stringEnumMappers_withNullDefault_string")
+  public void withDefault_for_null_only_returns_default_value_when_enum_is_null(StringEnumMapper<EnumA> mapper)
+      throws Exception {
+    assertThat(mapper.toString(null)).isEqualTo(DEFAULT_STRING_VALUE);
+    assertThat(mapper.except(VALUE_1, null).toString(VALUE_1)).isNull();
+  }
+
+  /**
+   * Creates the combination of calls to withNullDefault for every StringEnumMapper
+   */
+  @DataProvider
+  public Iterator<Object[]> stringEnumMappers_withNullDefault_string() {
+    final MappingDefaults<String> nullDefaults = MappingDefaults.<String>defaultToNull()
+                                                                         .withNullDefault(DEFAULT_STRING_VALUE);
+    return EnumA.createCombination(
+        BASE_ENUM_MAPPERS,
+        new Function<StringEnumMapper<EnumA>, List<StringEnumMapper<EnumA>>>() {
+          @Nullable
+          @Override
+          public List<StringEnumMapper<EnumA>> apply(@Nonnull StringEnumMapper<EnumA> input) {
+            return of(
+                input.withNullDefault(DEFAULT_STRING_VALUE),
+                input.withStringDefaults(nullDefaults)
+            );
+          }
+        }
+    );
+  }
+
+  @Test(dataProvider = "stringEnumMappers_withUnknownDefault_string")
+  public void withDefault_for_unknown_only_returns_default_value_when_enum_is_unknown(StringEnumMapper<EnumA> mapper)
+      throws Exception {
+    assertThat(mapper.toString(null)).isNull();
+    assertThat(mapper.except(VALUE_1, null).toString(VALUE_1)).isEqualTo(DEFAULT_STRING_VALUE);
+  }
+
+  /**
+   * Creates the combination of calls to withNullDefault for every StringEnumMapper
+   */
+  @DataProvider
+  public Iterator<Object[]> stringEnumMappers_withUnknownDefault_string() {
+    final MappingDefaults<String> unknownDefaults = MappingDefaults.<String>defaultToNull()
+                                                                         .withUnknownDefault(DEFAULT_STRING_VALUE);
+    return EnumA.createCombination(
+        BASE_ENUM_MAPPERS,
+        new Function<StringEnumMapper<EnumA>, List<StringEnumMapper<EnumA>>>() {
+          @Nullable
+          @Override
+          public List<StringEnumMapper<EnumA>> apply(@Nonnull StringEnumMapper<EnumA> input) {
+            return of(
+                input.withUnknownDefault(DEFAULT_STRING_VALUE),
+                input.withStringDefaults(unknownDefaults)
+            );
+          }
+        }
+    );
+  }
+
+  @Test(dataProvider = "stringEnumMappers_withSameDefault_enum_for_all_cases")
+  public void withDefault_returns_default_value_when_string_is_null_empty_or_unknown(StringEnumMapper<T> mapper)
       throws Exception {
     assertThat(mapper.toEnum(null)).isEqualTo(VALUE_1);
     assertThat(mapper.toEnum("")).isEqualTo(VALUE_1);
@@ -80,7 +149,7 @@ public class StringEnumMapper_defaults_Test<T extends Enum<T>> {
    * {@link EnumA#VALUE_1} for every case where source enum value can not be mapped.
    */
   @DataProvider
-  public Iterator<Object[]> stringEnumMappers_withSameDefault_for_all_cases() {
+  public Iterator<Object[]> stringEnumMappers_withSameDefault_enum_for_all_cases() {
     final MappingDefaults<EnumA> alldefaultsToVALUE_1 = MappingDefaults.defaultTo(VALUE_1);
     return EnumA.createCombination(
         BASE_ENUM_MAPPERS,
@@ -104,7 +173,7 @@ public class StringEnumMapper_defaults_Test<T extends Enum<T>> {
   }
 
   @Test(dataProvider = "stringEnumMappers_withNullDefault_enum")
-  public void withDefault_for_null_only_returns_default_value_when_enum_is_null(StringEnumMapper<T> mapper)
+  public void withDefault_for_null_only_returns_default_value_when_string_is_null(StringEnumMapper<T> mapper)
       throws Exception {
     assertThat(mapper.toEnum(null)).isEqualTo(VALUE_1);
     assertThat(mapper.toEnum("")).isNull();
@@ -134,7 +203,7 @@ public class StringEnumMapper_defaults_Test<T extends Enum<T>> {
   }
 
   @Test(dataProvider = "stringEnumMappers_withEmptyDefault_enum")
-  public void withDefault_for_empty_only_returns_default_value_when_enum_is_empty(StringEnumMapper<T> mapper)
+  public void withDefault_for_empty_only_returns_default_value_when_string_is_empty(StringEnumMapper<T> mapper)
       throws Exception {
     assertThat(mapper.toEnum("")).isEqualTo(VALUE_1);
     assertThat(mapper.toEnum(null)).isNull();
@@ -164,7 +233,7 @@ public class StringEnumMapper_defaults_Test<T extends Enum<T>> {
   }
 
   @Test(dataProvider = "stringEnumMappers_withUnknownDefault_enum")
-  public void withDefault_for_Unknown_only_returns_default_value_when_enum_is_unknown(StringEnumMapper<T> mapper)
+  public void withDefault_for_Unknown_only_returns_default_value_when_string_is_unknown(StringEnumMapper<T> mapper)
       throws Exception {
     assertThat(mapper.toEnum(UNKNOWN_ENUM_NAME)).isEqualTo(VALUE_1);
     assertThat(mapper.toEnum(null)).isNull();
@@ -194,7 +263,7 @@ public class StringEnumMapper_defaults_Test<T extends Enum<T>> {
   }
 
   @Test(dataProvider = "stringEnumMappers_withNullDefault_withEmptyDefault_enum")
-  public void withDefault_for_empty_and_null_only_returns_default_value_when_enum_is_null_or_empty(
+  public void withDefault_for_empty_and_null_only_returns_default_value_when_string_is_null_or_empty(
       StringEnumMapper<T> mapper) throws Exception {
     assertThat(mapper.toEnum(null)).isEqualTo(VALUE_1);
     assertThat(mapper.toEnum("")).isEqualTo(VALUE_1);
@@ -228,7 +297,7 @@ public class StringEnumMapper_defaults_Test<T extends Enum<T>> {
   }
 
   @Test(dataProvider = "stringEnumMappers_withNullDefault_withUnknownDefault_enum")
-  public void withDefault_for_null_and_unknown_only_returns_default_value_when_enum_is_null_or_unknown(
+  public void withDefault_for_null_and_unknown_only_returns_default_value_when_string_is_null_or_unknown(
       StringEnumMapper<T> mapper) throws Exception {
     assertThat(mapper.toEnum(null)).isEqualTo(VALUE_1);
     assertThat(mapper.toEnum(UNKNOWN_ENUM_NAME)).isEqualTo(VALUE_1);
@@ -262,7 +331,7 @@ public class StringEnumMapper_defaults_Test<T extends Enum<T>> {
   }
 
   @Test(dataProvider = "stringEnumMappers_withEmptyDefault_withUnknownDefault_enum")
-  public void withDefault_for_empty_and_unknown_only_returns_default_value_when_enum_is_null_or_unknown(
+  public void withDefault_for_empty_and_unknown_only_returns_default_value_when_string_is_empty_or_unknown(
       StringEnumMapper<T> mapper) throws Exception {
     assertThat(mapper.toEnum(null)).isNull();
     assertThat(mapper.toEnum("")).isEqualTo(VALUE_1);
@@ -297,7 +366,7 @@ public class StringEnumMapper_defaults_Test<T extends Enum<T>> {
 
 
   @Test(dataProvider = "stringEnumMappers_with_different_default_for_each_case_enum")
-  public void can_return_a_specific_default_for_each_case(
+  public void toEnum_return_a_specific_default_enum_value_for_each_case(
       StringEnumMapper<T> mapper) throws Exception {
     assertThat(mapper.toEnum(null)).isEqualTo(VALUE_1);
     assertThat(mapper.toEnum("")).isEqualTo(VALUE_2);
