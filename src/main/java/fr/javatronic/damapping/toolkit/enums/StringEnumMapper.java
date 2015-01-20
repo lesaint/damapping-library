@@ -23,11 +23,81 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
 /**
- * Interface implemented by all mapper mapping an enum to and from a String.
+ * StringEnumMapper - Defines a fluent interface to configure and use a mapper mapping an enum to and from a String.
  * <p>
- * It exposes methods to map to and from a String and to and from an enum. It also exposes methods to creates new
- * StringEnumMapper instances which have slightly different behavior, being either different defaults, exceptions or a
- * case insensitive behavior.
+ * StringEnumMapper implementations should not raise exception whenever they fail to perform the mapping. They should
+ * return a "default value".
+ * <br/>
+ * Cases where a default value should be returned are limited and implementation could support each case individually or
+ * globally.
+ * <br/>
+ * Implementations can choose to provide only limited support for default values, in which case StringEnumMapper methods
+ * which are not supported should raise a {@link java.lang.UnsupportedOperationException}.
+ * </p>
+ * <p>
+ * Here are all the default value cases:
+ * <ul>
+ * <li>when mapping from an enum to a String: the input is {@code null} or the input is unknown/unsupported</li>
+ * <li>
+ * when mapping from a String to an enum: the input is {@code null} or the input is empty or the input is {@code null}
+ * </li>
+ * </ul>
+ * </p>
+ * <p>
+ * Prime methods define mapping an Enum value from a String ({@link #toEnum(String)}) and a String to an enum value
+ * ({@link #toString(Enum)}).
+ * </p>
+ * <p>
+ * Other methods allow to create new StringEnumMapper instances from the current one which have slightly different
+ * behavior:
+ * <ul>
+ * <li>
+ * use other default enum value returned when mapping from a {@code null}, empty or unknown String:
+ * <br/>
+ * (see {@link StringEnumMapper#withDefault(Enum)}, {@link StringEnumMapper#withNullDefault(Enum)}, {@link
+ * StringEnumMapper#withEmptyDefault(Enum)}, {@link StringEnumMapper#withUnknownDefault(Enum)} and {@link
+ * StringEnumMapper#withEnumDefaults(MappingDefaults)})
+ * </li>
+ * <li>
+ * use other default String value returned when mapping from a {@code null} or unknown enum value
+ * <br/>
+ * (see {@link StringEnumMapper#withDefault(String)}, {@link StringEnumMapper#withNullDefault(String)}),
+ * {@link StringEnumMapper#withUnknownDefault(String)} and {@link StringEnumMapper#withStringDefaults(MappingDefaults)})
+ * </li>
+ * <li>
+ * use a case sensitive String comparison instead of a strict one
+ * <br/>
+ * (see {@link #ignoreCase()})
+ * </li>
+ * <li>
+ * add extra mappings from String to enum value or disable existing ones
+ * <br/>
+ * (see {@link #except(String, Enum)}
+ * </li>
+ * <li>
+ * override mapping from enum to String
+ * <br/>
+ * (see {@link #except(Enum, String)})
+ * </li>
+ * <li>
+ * override mapping from enum to String and from String to enum (bijective mapping)
+ * <br/>
+ * (see {@link #except(fr.javatronic.damapping.toolkit.BiMapping)})
+ * </li>
+ * </ul>.
+ * </p>
+ * <p>
+ * This interface is primarily implemented by objects created by class
+ * {@link fr.javatronic.damapping.toolkit.enums.StringEnumMappers} and behavior customisation methods can be used
+ * sequentially using methods cascading (as one would expect from a fluent interface) as demonstrated below:
+ * <pre>
+ * StringEnumMapper.StringEnumMapper mapper = StringEnumMapper.map(Bar.class)
+ *     .byName()
+ *     .ignoreCase()
+ *     .withDefault("no_bar_value")
+ *     .withNullDefault(Bar.ACME)
+ *     .withEmptyDefault(Bar.VISEN)
+ * </pre>
  * </p>
  * <p>
  * <strong>implementation constraints:</strong><br/>
@@ -35,6 +105,8 @@ import javax.annotation.concurrent.Immutable;
  * </p>
  *
  * @param <E> any enum type
+ *
+ * @see fr.javatronic.damapping.toolkit.enums.StringEnumMappers
  */
 @Immutable
 public interface StringEnumMapper<E extends Enum<E>> {

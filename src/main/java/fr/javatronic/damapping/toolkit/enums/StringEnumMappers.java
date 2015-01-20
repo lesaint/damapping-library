@@ -30,80 +30,71 @@ import com.google.common.collect.Maps;
 import static java.util.Objects.requireNonNull;
 
 /**
- * StringEnumMappers - This class provides the developer with a convenient way to create mappers to map an enum value to
- * or from a String and specify its behavior in a readable way.
+ * StringEnumMappers - This class provides the developer with a convenient way to create StringEnumMapper objects to map
+ * an enum value to or from a String.
  * <p>
- * Mappers without explicit behavior expressed:
- * <ul>
- * <li>never throw an exception but instead return a null value</li>
- * <li>use strict String comparison, ie. are based on {@link String#compareTo(String)}</li>
- * </ul>
+ * The StringEnumMapper fluent interface is fully implemented by objects created by this class and respects the
+ * constraint of immutability defined by this interface.
  * </p>
  * <p>
- * The following behavior can be customized:
- * <ul>
- * <li>case insensitive String comparison can be used</li>
- * <li>String value returned when mapping from a {@code null} enum value, a specific value can be returned instead of
- * {@code null}</li>
- * <li>enum value returned from a {@code null}, empty or unknown String value can be customized as a whole or
- * selectively</li>
- * </ul>
+ * StringEnumMappers supports creating mappers that uses the {@link Enum#name()} or the {@link Enum#toString()} methods
+ * to map an enum value to and from a String or any implementation of the {@link BijectiveTransformer} interface.
  * </p>
  * <p>
- * Behavior customization is achieved using a meaningful method chaining, for example:
+ * All StringEnumMapper object creation starts with the syntax: {@code StringEnumMappers.map(SomeEnum.class)} followed
+ * either by method {@code byName()}, {@code byToString()} or {@code by(BijectiveTransformer)}.
+ * </p>
+ * <p>
+ * As enforced by the {@link StringEnumMapper} interface, all instances of {@link StringEnumMapper} are immutable and
+ * therefor thread safe. They can be safely shared across processes. In fact, user are even encouraged to store these
+ * objects in instance or static fields to save on the object creation cost.
+ * </p>
+ * <p>
  * <pre>
- * StringEnumMapper.StringEnumMapper mapper = StringEnumMapper.map(Bar.class)
- *     .byName()
- *     .ignoreCase()
- *     .withDefault("no_bar_value")
- *     .withNullDefault(Bar.ACME)
- *     .withEmptyDefault(Bar.VISEN)
- * </pre>
- * </p>
- * <p>
- * Most enum mappings are based on the name, sometimes on the value of toString(). These mappings have prime
- * support:
- * <pre>
- * assert StringEnumMapper.map(Bar.class).byName().toEnum("ACME") == Bar.ACME;
- * assert StringEnumMapper.map(Bar.class).byName().toString(Bar.ACME).equals("ACME");
- * assert StringEnumMapper.map(Bar.class).byToString().toEnum("bar_acme") == Bar.ACME;
- * assert StringEnumMapper.map(Bar.class).byToString().toString(Bar.ACME).equals("bar_acme");
- * </pre>
- * </p>
- * <p>
- * Any other String to enum value matching rule is supported using a custom transformation rule, for example:
- * <pre>
- * private static enum CustomBarToString implements StringEnumMapper.BijectiveTransformer&lt;EnumA&gt; {
- *   INSTANCE;
- *
- *  {@literal @}Override
- *  {@literal @}Nonnull
- *   public String transform({@literal @}Nonnull Bar enumValue) {
- *     switch (enumValue) {
- *       case ACME:
- *         return "Foo";
- *       default:
- *         throw new IllegalArgumentException("value is not supported in toString(), fix toString(): " + enumValue);
- *     }
+ * enum SomeEnum {
+ *   FOO, BAR, ACME;
+ *   {@literal @}Override
+ *   public String toString() {
+ *     return "_" + name();
  *   }
  * }
  *
- * assert StringEnumMapper.map(Bar.class).by(CustomBarToString.INSTANCE).toEnum("Foo") == Bar.ACME;
- * assert StringEnumMapper.map(Bar.class).by(CustomBarToString.INSTANCE).toString(Bar.ACME).equals("Foo");
+ * StringEnumMapper<SomeEnum> nameMapper = StringEnumMappers.map(SomeEnum.class).byName();
+ * StringEnumMapper<SomeEnum> toStringMapper = StringEnumMappers.map(SomeEnum.class).byToString();
+ *
+ * assertThat(nameMapper.toEnum("FOO")).isEqualTo(SomeEnum.FOO);
+ * assertThat(nameMapper.toString(SomeEnum.FOO)).isEqualTo("FOO");
+ * assertThat(toStringMapper.toString(SomeEnum.FOO)).isEqualTo("_FOO");
+ * assertThat(toStringMapper.toEnum("_FOO")).isEqualTo(SomeEnum.FOO);
+ *
+ * assertThat(mapper.toEnum("foo")).isEqualTo(SomeEnum.FOO);
+ * assertThat(mapper.toEnum("bar")).isEqualTo(SomeEnum.BAR);
+ * assertThat(mapper.toEnum("acme")).isNull();
+ *
+ * assertThat(nameMapper.ignoreCase().toEnum("foO")).isEqualTo(SomeEnum.FOO);
+ * assertThat(toStringMapper.ignoreCase().toEnum("_Foo")).isEqualTo(SomeEnum.FOO);
+ *
+ * // creates a mapper that uses the name() method, is case sensitive but also supports the lower case strings for
+ * // enum values FOO and BAR (and only those)
+ * StringEnumMapper<SomeEnum> mapper = StringEnumMappers.map(SomeEnum.class)
+ *     .byName()
+ *     .except("foo", SomeEnum.FOO)
+ *     .except("bar", SomeEnum.BAR);
+ *
+ * assertThat(mapper.toEnum("foo")).isEqualTo(SomeEnum.FOO);
+ * assertThat(mapper.toEnum("bar")).isEqualTo(SomeEnum.BAR);
+ * assertThat(mapper.toEnum("acme")).isNull();
  * </pre>
  * </p>
- * <p>
- * <strong>Note on thread-safety:</strong> mapper produced by this class are thread-safe and can safely be shared,
- * stored in class property and/or be static.
- * </p>
  *
- * @author Sébastien Lesaint
+ * @author S&eacute;bastien Lesaint
  */
 /*
  * TODO add shorthand for case-sensitive matching on name with optional such as Guava's <T extends Enum<T>>
  * Optional<T> getIfPresent(Class<T>, String)
- * TODO Java8 support: make BijectiveTransformer a Functional interface, add methods returning optional instead of null? quid
- * of defaults?
+ * TODO Java8 support: make BijectiveTransformer a Functional interface, add methods returning optional instead of
+ * null? quid of defaults?
+ * TODO add method StringEnumMapper#trim and a method to specify a custom string formatter
  */
 public final class StringEnumMappers {
   private StringEnumMappers() {
@@ -167,19 +158,25 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<T> byName() {
-      return new BijectiveTransformerStringEnumMapper<>(enumAClass, new EnumNameFunction<T>(), StringEnumMapperDefaults.<T>defaultsToNull());
+      return new BijectiveTransformerStringEnumMapper<>(enumAClass, new EnumNameFunction<T>(),
+          StringEnumMapperDefaults.<T>defaultsToNull()
+      );
     }
 
     @Nonnull
     @Override
     public StringEnumMapper<T> byToString() {
-      return new BijectiveTransformerStringEnumMapper<>(enumAClass, new EnumToStringFunction<T>(), StringEnumMapperDefaults.<T>defaultsToNull());
+      return new BijectiveTransformerStringEnumMapper<>(enumAClass, new EnumToStringFunction<T>(),
+          StringEnumMapperDefaults.<T>defaultsToNull()
+      );
     }
 
     @Override
     @Nonnull
     public StringEnumMapper<T> by(@Nonnull BijectiveTransformer<T> transformer) {
-      return new BijectiveTransformerStringEnumMapper<>(enumAClass, transformer, StringEnumMapperDefaults.<T>defaultsToNull());
+      return new BijectiveTransformerStringEnumMapper<>(enumAClass, transformer,
+          StringEnumMapperDefaults.<T>defaultsToNull()
+      );
     }
   }
 
@@ -568,13 +565,13 @@ public final class StringEnumMappers {
     }
   }
 
-  private static class CaseInsensitiveBijectiveTransformertringEnumMapper<E extends Enum<E>>
-   extends CaseInsensitiveMapStringEnumMapper<E>
-   implements StringEnumMapper<E> {
+  private static class CaseInsensitiveBijectiveTransformerStringEnumMapper<E extends Enum<E>>
+      extends CaseInsensitiveMapStringEnumMapper<E>
+      implements StringEnumMapper<E> {
 
-    public CaseInsensitiveBijectiveTransformertringEnumMapper(@Nonnull Class<E> clazz,
-                                                              @Nonnull StringEnumMapperMaps<E> maps,
-                                                              @Nonnull StringEnumMapperDefaults<E> defaults) {
+    public CaseInsensitiveBijectiveTransformerStringEnumMapper(@Nonnull Class<E> clazz,
+                                                               @Nonnull StringEnumMapperMaps<E> maps,
+                                                               @Nonnull StringEnumMapperDefaults<E> defaults) {
       super(clazz, maps, defaults);
     }
 
@@ -594,7 +591,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> except(@Nonnull E enumValue, @Nullable String str) {
-      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(
+      return new CaseInsensitiveBijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps.except(enumValue, str),
           this.defaults
@@ -604,7 +601,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> except(@Nonnull String str, @Nullable E e) {
-      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(
+      return new CaseInsensitiveBijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps.except(str, e),
           this.defaults
@@ -614,7 +611,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> except(@Nonnull BiMapping<E, String> exceptionMapping) {
-      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(
+      return new CaseInsensitiveBijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps.except(exceptionMapping),
           this.defaults
@@ -627,7 +624,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> withEnumDefaults(@Nonnull MappingDefaults<E> defaults) {
-      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(
+      return new CaseInsensitiveBijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps,
           this.defaults.withEnumDefaults(defaults)
@@ -637,7 +634,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> withDefault(@Nonnull String defaultValue) {
-      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(
+      return new CaseInsensitiveBijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps,
           this.defaults.withDefault(defaultValue)
@@ -647,7 +644,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> withDefault(@Nonnull E defaultValueForAll) {
-      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(
+      return new CaseInsensitiveBijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps,
           this.defaults.withDefault(defaultValueForAll)
@@ -657,7 +654,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> withNullDefault(@Nonnull E nullDefaultValue) {
-      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(
+      return new CaseInsensitiveBijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps,
           this.defaults.withNullDefault(nullDefaultValue)
@@ -667,7 +664,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> withEmptyDefault(@Nonnull E emptyDefaultValue) {
-      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(
+      return new CaseInsensitiveBijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps,
           this.defaults.withEmptyDefault(emptyDefaultValue)
@@ -677,7 +674,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> withUnknownDefault(@Nonnull E unknownDefaultValue) {
-      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(
+      return new CaseInsensitiveBijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps,
           this.defaults.withUnknownDefault(unknownDefaultValue)
@@ -686,8 +683,8 @@ public final class StringEnumMappers {
   }
 
   private static class BijectiveTransformerStringEnumMapper<E extends Enum<E>>
-     extends CaseSensitiveMapStringEnumMapper<E>
-    implements StringEnumMapper<E> {
+      extends CaseSensitiveMapStringEnumMapper<E>
+      implements StringEnumMapper<E> {
 
     private BijectiveTransformerStringEnumMapper(@Nonnull Class<E> clazz,
                                                  @Nonnull StringEnumMapperMaps<E> maps,
@@ -707,7 +704,7 @@ public final class StringEnumMappers {
     @Override
     @Nonnull
     public StringEnumMapper<E> ignoreCase() {
-      return new CaseInsensitiveBijectiveTransformertringEnumMapper<>(clazz, maps, defaults);
+      return new CaseInsensitiveBijectiveTransformerStringEnumMapper<>(clazz, maps, defaults);
     }
 
     /*====================*
