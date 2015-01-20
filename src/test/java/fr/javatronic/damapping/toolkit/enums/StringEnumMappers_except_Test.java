@@ -52,13 +52,33 @@ public class StringEnumMappers_except_Test {
   }
 
   @Test(dataProvider = "base_mappers", expectedExceptions = NullPointerException.class)
+  public void except_enum_to_string_throws_NPE_if_string_is_null(StringEnumMapper<EnumA> mapper) throws Exception {
+    mapper.except(VALUE_1, NULL_STRING);
+  }
+
+  @Test(dataProvider = "base_mappers", expectedExceptions = NullPointerException.class)
   public void except_string_to_enum_throws_NPE_if_string_is_null(StringEnumMapper<EnumA> mapper) throws Exception {
     mapper.except(NULL_STRING, VALUE_1);
   }
 
   @Test(dataProvider = "base_mappers", expectedExceptions = NullPointerException.class)
+  public void except_string_to_enum_throws_NPE_if_enum_is_null(StringEnumMapper<EnumA> mapper) throws Exception {
+    mapper.except(SOME_STRING, NULL_ENUM);
+  }
+
+  @Test(dataProvider = "base_mappers", expectedExceptions = NullPointerException.class)
   public void except_bimapping_throws_NPE_if_bimapping_is_null(StringEnumMapper<EnumA> mapper) throws Exception {
     mapper.except(NULL_BIMAPPING);
+  }
+
+  @Test(dataProvider = "base_mappers", expectedExceptions = NullPointerException.class)
+  public void except_enum_throws_NPE_if_enum_is_null(StringEnumMapper<EnumA> mapper) throws Exception {
+    mapper.except(NULL_ENUM);
+  }
+
+  @Test(dataProvider = "base_mappers", expectedExceptions = NullPointerException.class)
+  public void except_string_throws_NPE_if_string_is_null(StringEnumMapper<EnumA> mapper) throws Exception {
+    mapper.except(NULL_STRING);
   }
 
   @Test(dataProvider = "base_mappers")
@@ -69,6 +89,21 @@ public class StringEnumMappers_except_Test {
     for (EnumA enumA : EnumA.values()) {
       if (enumA == VALUE_1) {
         assertThat(exceptMapper.toString(enumA)).isEqualTo(SOME_STRING);
+      }
+      else {
+        assertThat(exceptMapper.toString(enumA)).isEqualTo(mapper.toString(enumA));
+      }
+    }
+  }
+
+  @Test(dataProvider = "base_mappers")
+  public void except_enum_affects_mapping_only_from_the_specified_enum_value(StringEnumMapper<EnumA> mapper)
+      throws Exception {
+    StringEnumMapper<EnumA> exceptMapper = mapper.except(VALUE_1);
+
+    for (EnumA enumA : EnumA.values()) {
+      if (enumA == VALUE_1) {
+        assertThat(exceptMapper.toString(enumA)).isNull();
       }
       else {
         assertThat(exceptMapper.toString(enumA)).isEqualTo(mapper.toString(enumA));
@@ -103,6 +138,22 @@ public class StringEnumMappers_except_Test {
     for (EnumA enumA : EnumA.values()) {
       String str = mapper.toString(enumA);
       assertThat(exceptMapper.toEnum(str)).isEqualTo(mapper.toEnum(str));
+    }
+  }
+
+  @Test(dataProvider = "base_mappers")
+  public void except_string_affects_mapping_only_from_the_specified_string_value(StringEnumMapper<EnumA> mapper)
+      throws Exception {
+    StringEnumMapper<EnumA> exceptMapper = mapper.except(mapper.toString(VALUE_1));
+
+    for (EnumA enumA : EnumA.values()) {
+      String str = mapper.toString(enumA);
+      if (enumA == VALUE_1) {
+        assertThat(exceptMapper.toEnum(str)).isNull();
+      }
+      else {
+        assertThat(exceptMapper.toEnum(str)).isEqualTo(mapper.toEnum(str));
+      }
     }
   }
 

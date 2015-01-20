@@ -80,7 +80,17 @@ import javax.annotation.concurrent.Immutable;
  * (see {@link #except(Enum, String)})
  * </li>
  * <li>
- * override mapping from enum to String and from String to enum (bijective mapping)
+ * remove mapping from a String
+ * <br/>
+ * (see {@link #except(String)})
+ * </li>
+ * <li>
+ * remove mapping from an enum value
+ * <br/>
+ * (see {@link #except(Enum)})
+ * </li>
+ * <li>
+ * override mapping from enum to String and from String to enum (aka. bijective mapping)
  * <br/>
  * (see {@link #except(fr.javatronic.damapping.toolkit.BiMapping)})
  * </li>
@@ -152,11 +162,41 @@ public interface StringEnumMapper<E extends Enum<E>> {
    *====================*/
 
   /**
+   * Creates a new StringEnumMapper instance which is the same as the current one except that the mapping from the
+   * specified enum value has been removed.
+   *
+   * @param enumValue an enum value
+   *
+   * @return a {@link StringEnumMapper}
+   *
+   * @throws java.lang.NullPointerException if enumValue is {@code null}
+   */
+  @Nonnull
+  StringEnumMapper<E> except(@Nonnull E enumValue);
+
+  /**
+   * Creates a new StringEnumMapper instance which is the same as the current one except that the mapping from the
+   * specified String has been removed.
+   *
+   * @param str a {@link String}
+   *
+   * @return a {@link StringEnumMapper}
+   *
+   * @throws java.lang.NullPointerException if str is {@code null}
+   */
+  @Nonnull
+  StringEnumMapper<E> except(@Nonnull String str);
+
+  /**
    * Creates a new StringEnumMapper instance which is the same as the current one except that it overrides the
    * mapping from the specified enum value to the specified String or {@code null}.
    * <p>
    * The Enum parameter can not be {@code null}. To define the mapping from the {@code null} enum value to a String,
-   * use {@link #withDefault(String)}.
+   * use {@link #withNullDefault(String)}.
+   * </p>
+   * <p>
+   * The String parameter can not be {@code null} either. To remove the mapping from a specific enum value, use
+   * {@link #except(Enum)}.
    * </p>
    * <p>
    * This method is used to define a <strong>unidirectional</strong> mapping from an enum value to a String or
@@ -165,23 +205,27 @@ public interface StringEnumMapper<E extends Enum<E>> {
    * </p>
    *
    * @param enumValue an enum value
-   * @param str       a {@link String} or {@code null}
+   * @param str       a {@link String}
    *
    * @return a {@link StringEnumMapper}
    *
-   * @throws java.lang.NullPointerException if enumValue is {@code null}
-   * @see #withDefault(String)
+   * @throws java.lang.NullPointerException if enumValue or str is {@code null}
+   * @see #withNullDefault(String)
+   * @see #except(Enum)
    * @see #except(fr.javatronic.damapping.toolkit.BiMapping)
    */
   @Nonnull
-  StringEnumMapper<E> except(@Nonnull E enumValue, @Nullable String str);
+  StringEnumMapper<E> except(@Nonnull E enumValue, @Nonnull String str);
 
   /**
    * Creates a new StringEnumMapper instance which is the same as the current one except that it overrides (or defines)
    * the mapping from the specified String value to the specified enum value or {@code null}.
    * <p>
    * The String parameter can not be {@code null}. To define the mapping from the {@code null} String to an enum
-   * value, use {@link #withNullDefault(Enum)}
+   * value, use {@link #withNullDefault(Enum)}.
+   * </p>
+   * <p>
+   * The enum value can not be {@code null}. To remove a mapping from a String, use {@link #except(String)}.
    * </p>
    * <p>
    * This method is used to define a <strong>unidirectional</strong> mapping from a String to an enum value or
@@ -189,17 +233,18 @@ public interface StringEnumMapper<E extends Enum<E>> {
    * {@link #except(fr.javatronic.damapping.toolkit.BiMapping)}.
    * </p>
    *
-   * @param str a {@link String}
-   * @param e   an enum value or {@code null}
+   * @param str       a {@link String}
+   * @param enumValue an enum value
    *
    * @return a {@link StringEnumMapper}
    *
-   * @throws java.lang.NullPointerException if str is {@code null}
+   * @throws java.lang.NullPointerException if str or enumValue is {@code null}
    * @see #withNullDefault(Enum)
+   * @see #except(String)
    * @see #except(fr.javatronic.damapping.toolkit.BiMapping)
    */
   @Nonnull
-  StringEnumMapper<E> except(@Nonnull String str, @Nullable E e);
+  StringEnumMapper<E> except(@Nonnull String str, @Nonnull E enumValue);
 
   /**
    * Creates a new StringEnumMapper instance which is the same as the current one except that it overrides

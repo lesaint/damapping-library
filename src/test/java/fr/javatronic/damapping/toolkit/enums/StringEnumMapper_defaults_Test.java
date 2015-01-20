@@ -53,7 +53,7 @@ public class StringEnumMapper_defaults_Test<T extends Enum<T>> {
   @Test(dataProvider = "stringEnumMappers_withSameDefault_string_for_all_cases")
   public void withDefault_returns_default_value_when_enum_is_null_or_unknown(StringEnumMapper<EnumA> mapper) throws Exception {
     assertThat(mapper.toString(null)).isEqualTo(DEFAULT_STRING_VALUE);
-    assertThat(mapper.except(VALUE_1, null).toString(VALUE_1)).isEqualTo(DEFAULT_STRING_VALUE);
+    assertThat(mapper.except(VALUE_1).toString(VALUE_1)).isEqualTo(DEFAULT_STRING_VALUE);
   }
 
   /**
@@ -81,7 +81,7 @@ public class StringEnumMapper_defaults_Test<T extends Enum<T>> {
   public void withDefault_for_null_only_returns_default_value_when_enum_is_null(StringEnumMapper<EnumA> mapper)
       throws Exception {
     assertThat(mapper.toString(null)).isEqualTo(DEFAULT_STRING_VALUE);
-    assertThat(mapper.except(VALUE_1, null).toString(VALUE_1)).isNull();
+    assertThat(mapper.except(VALUE_1).toString(VALUE_1)).isNull();
   }
 
   /**
@@ -110,7 +110,7 @@ public class StringEnumMapper_defaults_Test<T extends Enum<T>> {
   public void withDefault_for_unknown_only_returns_default_value_when_enum_is_unknown(StringEnumMapper<EnumA> mapper)
       throws Exception {
     assertThat(mapper.toString(null)).isNull();
-    assertThat(mapper.except(VALUE_1, null).toString(VALUE_1)).isEqualTo(DEFAULT_STRING_VALUE);
+    assertThat(mapper.except(VALUE_1).toString(VALUE_1)).isEqualTo(DEFAULT_STRING_VALUE);
   }
 
   /**

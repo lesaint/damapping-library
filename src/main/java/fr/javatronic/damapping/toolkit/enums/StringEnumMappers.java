@@ -19,7 +19,6 @@ import fr.javatronic.damapping.toolkit.BiMapping;
 import fr.javatronic.damapping.toolkit.MappingDefaults;
 
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -397,6 +396,9 @@ public final class StringEnumMappers {
    */
   @Immutable
   private static class StringEnumMapperMaps<E extends Enum<E>> {
+    private static final String NULL_ENUM_VALUE_ERROR_MESSAGE = "Can not create an except for a null enum value";
+    private static final String NULL_STRING_ERROR_MESSAGE = "Can not create an except for a null String";
+
     @Nonnull
     private final ImmutableMap<E, String> enumToString;
     @Nonnull
@@ -442,8 +444,27 @@ public final class StringEnumMappers {
     }
 
     @Nonnull
-    public StringEnumMapperMaps<E> except(@Nonnull E enumValue, @Nullable String str) {
-      requireNonNull(enumValue, "Can not create an except for a null enum value");
+    public StringEnumMapperMaps<E> except(@Nonnull E enumValue) {
+      requireNonNull(enumValue, NULL_ENUM_VALUE_ERROR_MESSAGE);
+      return new StringEnumMapperMaps<>(
+          exceptEnumMap(enumValue, null),
+          this.stringToEnum
+      );
+    }
+
+    @Nonnull
+    public StringEnumMapperMaps<E> except(@Nonnull String str) {
+      requireNonNull(str, NULL_STRING_ERROR_MESSAGE);
+      return new StringEnumMapperMaps<>(
+          this.enumToString,
+          exceptStringMap(str, null)
+      );
+    }
+
+    @Nonnull
+    public StringEnumMapperMaps<E> except(@Nonnull E enumValue, @Nonnull String str) {
+      requireNonNull(enumValue, NULL_ENUM_VALUE_ERROR_MESSAGE);
+      requireNonNull(str, "method except(E, String) can not be used to remove a mapping from an enum value. Use method except(E)");
       return new StringEnumMapperMaps<>(
           exceptEnumMap(enumValue, str),
           this.stringToEnum
@@ -451,7 +472,7 @@ public final class StringEnumMappers {
     }
 
     @Nonnull
-    private ImmutableMap<E, String> exceptEnumMap(E enumValue, String str) {
+    private ImmutableMap<E, String> exceptEnumMap(E enumValue, @Nullable String str) {
       EnumMap<E, String> enumMap = Maps.newEnumMap(this.enumToString);
       if (str == null) {
         enumMap.remove(enumValue);
@@ -464,7 +485,8 @@ public final class StringEnumMappers {
 
     @Nonnull
     public StringEnumMapperMaps<E> except(@Nonnull String str, @Nullable E e) {
-      requireNonNull(str, "Can not create an except for a null String");
+      requireNonNull(str, NULL_STRING_ERROR_MESSAGE);
+      requireNonNull(e, "method except(String, E) can not be used to remove a mapping from an String. Use method except(String)");
       return new StringEnumMapperMaps<>(
           this.enumToString,
           exceptStringMap(str, e)
@@ -472,9 +494,14 @@ public final class StringEnumMappers {
     }
 
     @Nonnull
-    private ImmutableMap<String, E> exceptStringMap(String str, E e) {
-      HashMap<String, E> map = Maps.newHashMap(this.stringToEnum);
-      map.put(str, e);
+    private ImmutableMap<String, E> exceptStringMap(String str, @Nullable E e) {
+      Map<String, E> map = Maps.newHashMap(this.stringToEnum);
+      if (e == null) {
+        map.remove(str);
+      }
+      else {
+        map.put(str, e);
+      }
       return ImmutableMap.copyOf(map);
     }
 
@@ -647,6 +674,26 @@ public final class StringEnumMappers {
 
     @Override
     @Nonnull
+    public StringEnumMapper<E> except(@Nonnull E enumValue) {
+      return new CaseInsensitiveBijectiveTransformerStringEnumMapper<>(
+          this.clazz,
+          this.maps.except(enumValue),
+          this.defaults
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> except(@Nonnull String str) {
+      return new CaseInsensitiveBijectiveTransformerStringEnumMapper<>(
+          this.clazz,
+          this.maps.except(str),
+          this.defaults
+      );
+    }
+
+    @Override
+    @Nonnull
     public StringEnumMapper<E> except(@Nonnull E enumValue, @Nullable String str) {
       return new CaseInsensitiveBijectiveTransformerStringEnumMapper<>(
           this.clazz,
@@ -657,10 +704,10 @@ public final class StringEnumMappers {
 
     @Override
     @Nonnull
-    public StringEnumMapper<E> except(@Nonnull String str, @Nullable E e) {
+    public StringEnumMapper<E> except(@Nonnull String str, @Nullable E enumValue) {
       return new CaseInsensitiveBijectiveTransformerStringEnumMapper<>(
           this.clazz,
-          this.maps.except(str, e),
+          this.maps.except(str, enumValue),
           this.defaults
       );
     }
@@ -800,7 +847,27 @@ public final class StringEnumMappers {
 
     @Override
     @Nonnull
-    public StringEnumMapper<E> except(@Nonnull E enumValue, @Nullable String str) {
+    public StringEnumMapper<E> except(@Nonnull E enumValue) {
+      return new BijectiveTransformerStringEnumMapper<>(
+          this.clazz,
+          this.maps.except(enumValue),
+          this.defaults
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> except(@Nonnull String str) {
+      return new BijectiveTransformerStringEnumMapper<>(
+          this.clazz,
+          this.maps.except(str),
+          this.defaults
+      );
+    }
+
+    @Override
+    @Nonnull
+    public StringEnumMapper<E> except(@Nonnull E enumValue, @Nonnull String str) {
       return new BijectiveTransformerStringEnumMapper<>(
           this.clazz,
           this.maps.except(enumValue, str),
@@ -810,10 +877,10 @@ public final class StringEnumMappers {
 
     @Override
     @Nonnull
-    public StringEnumMapper<E> except(@Nonnull String str, @Nullable E e) {
+    public StringEnumMapper<E> except(@Nonnull String str, @Nonnull E enumValue) {
       return new BijectiveTransformerStringEnumMapper<>(
           this.clazz,
-          this.maps.except(str, e),
+          this.maps.except(str, enumValue),
           this.defaults
       );
     }
