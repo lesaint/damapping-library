@@ -22,11 +22,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * ByStringEnumMapperTest - Unit tests for class mapping an enum to and from a String by the some custom
- * &transformation.
+ * BijectiveTransformer instance.
  *
  * @author Sébastien Lesaint
  */
-public class StringEnumMappers_Custom_Test {
+public class StringEnumMappers_BijectiveTransformer_Test {
 
   private static final String DUMMY_STRING_VALUE = "fooBarAcme";
 
@@ -85,12 +85,12 @@ public class StringEnumMappers_Custom_Test {
    * byCustom ignoreCase *
    *=====================*/
   @Test
-  public void map_byCustom_ignoreCase_toString_returns_null_for_null_value() throws Exception {
+  public void map_by_ignoreCase_toString_returns_null_for_null_value() throws Exception {
     assertThat(map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).ignoreCase().toString(null)).isNull();
   }
 
   @Test
-  public void map_byCustom_ignoreCase_toString_returns_name_value() throws Exception {
+  public void map_by_ignoreCase_toString_returns_name_value() throws Exception {
     for (EnumA enumA : EnumA.values()) {
       assertThat(
           map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).ignoreCase().toString(enumA)
@@ -99,12 +99,12 @@ public class StringEnumMappers_Custom_Test {
   }
 
   @Test
-  public void map_byCustom_ignoreCase_toEnum_returns_null_for_null_value() throws Exception {
+  public void map_by_ignoreCase_toEnum_returns_null_for_null_value() throws Exception {
     assertThat(map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).ignoreCase().toEnum(null)).isNull();
   }
 
   @Test
-  public void map_byCustom_ignoreCase_toEnum_returns_enum_when_case_does_not_match() throws Exception {
+  public void map_by_ignoreCase_toEnum_returns_enum_when_case_does_not_match() throws Exception {
     StringEnumMapper<EnumA> mapper = map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).ignoreCase();
 
     for (EnumA enumA : EnumA.values()) {
@@ -113,7 +113,7 @@ public class StringEnumMappers_Custom_Test {
   }
 
   @Test
-  public void map_byCustom_ignoreCase_returns_itself_as_ignoreCase_returned_value() throws Exception {
+  public void map_by_ignoreCase_returns_itself_as_ignoreCase_returned_value() throws Exception {
     StringEnumMapper<EnumA> mapper = map(EnumA.class).by(WeirdEnumATransformer.INSTANCE).ignoreCase();
 
     assertThat(mapper.ignoreCase()).isSameAs(mapper);
